@@ -1,2 +1,2 @@
 # Funktionsgenerator
-DIY Funktionsgenerator mit Atmega328 und TFT Display
+DIY Funktionsgenerator basierend aufdem DDS AD9833 mit einem Atmega328 (Arduino) als Mikrocontroller, und einem TFT Display
