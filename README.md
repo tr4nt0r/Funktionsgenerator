@@ -23,7 +23,7 @@ This work is based on this [howto](https://www.allaboutcircuits.com/projects/how
 | Qty | Value | Device | Package | Description | Vendor | Price |
 | ---: | :--- | :--- | :--- | :--- | :--- | ---: |
 | 1 | | KMR-1.8 SPI ST7735R | | 1.8" TFT Display |  [eBay](https://www.ebay.de/sch/i.html?_from=R40&_trksid=m570.l1313&_nkw=1%2C8%22+tft+spi+st7735r&_sacat=0) | 2,88€ |
-| 1 | | SPDT | | Switch for Front Panel Mount 12mm | [eBay](https://www.ebay.de/sch/i.html?_from=R40&_trksid=p2380057.m570.l1313.TR11.TRC2.A0.H0.Xtaster+12mm.TRS0&_nkw=taster+12mm&_sacat=0) | 2,00€ |
+| 1 | | SPDT | | Toggle switch for Front Panel Mount | [eBay](https://www.ebay.de/sch/i.html?_from=R40&_trksid=p2380057.m570.l1313.TR12.TRC2.A0.H0.Xtoggle+switch+12mm.TRS0&_nkw=toggle+switch+12mm&_sacat=0) | 3,00€ |
 | 1 | 1,3k | Resistor | 0603 | | | 0,01€
 | 1 | 620 | Resistor | 0603 |||0,01€|
 | 8 | 100n | Capacitor | 0603 | | | 0,01€
