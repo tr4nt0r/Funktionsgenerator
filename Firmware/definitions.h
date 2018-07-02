@@ -26,7 +26,7 @@ const unsigned long maxFrequency = 14000000;
 const unsigned int maxPhase = 4095; // Only used if you enable PHASE setting instead of FREQ register
 unsigned long newFrequency = 1000;
 volatile bool updateDisplay = false;
-unsigned long depressionTime;
+
 int freqRegister = 0; // Default FREQ register is 0
 					  // LCD constants
 const String powerState[] = { " ON", "OFF" };
