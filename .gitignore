@@ -332,3 +332,4 @@ ASALocalRun/
 #VisualMicro Stuff
 __vm/
 *.vcxproj*
+*.sln
