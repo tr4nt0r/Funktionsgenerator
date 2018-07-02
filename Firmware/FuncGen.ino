@@ -1,49 +1,15 @@
 
+#include "definitions.h"
 #include "LiquidCrystal_I2C.h"
 #include "AD9833.h"
 #include "Rotary.h"
 #include "math.h"
 
-//Uncomment the line below if you want to change the Phase instead of the FREQ register
-//#define usePhase
 
 AD9833 sigGen(10, 24000000); // Initialise our AD9833 with FSYNC pin = 10 and a master clock frequency of 24MHz
 LiquidCrystal_I2C lcd(0x27, 16, 2); // LCD Initialise
 Rotary encoder(2, 3);// Initialise the encoder on pins 2 and 3 (interrupt pins)
 
-// Variables used to input data and walk through menu
-unsigned long encValue;        // Value used by encoder
-unsigned long lastButtonPress; // Value used by button debounce
-unsigned char lastButtonState;
-unsigned char settingsPos[] = {0, 14, 20, 29};
-unsigned char button;
-volatile unsigned char cursorPos = 0;
-unsigned char lastCursorPos = 0;
-unsigned char menuState = 0;
-const int buttonPin = 1;
-int digitPos = 0;
-const unsigned long maxFrequency = 14000000;
-const unsigned int maxPhase = 4095; // Only used if you enable PHASE setting instead of FREQ register
-unsigned long newFrequency = 1000;
-volatile bool updateDisplay = false;
-unsigned long depressionTime;
-int freqRegister = 0; // Default FREQ register is 0
-// LCD constants
-const String powerState[] = {" ON", "OFF"};
-const String mode[] = {"SIN", "TRI", "CLK"};
-// Variables used to store phase, frequency, mode and power
-unsigned char currentMode = 0;
-unsigned long frequency0 = 1000;
-unsigned long frequency1 = 1000;
-unsigned long frequency = frequency0;
-unsigned long currFrequency; // Current frequency used, either 0 or 1
-unsigned long phase = 0; // Only used if you enable PHASE setting instead of FREQ register
-unsigned char currentPowerState = 0;
-// Greek PHI symbol for phase shift
-// Only used if you enable PHASE setting instead of FREQ register
-uint8_t phi[8] = {0b01110, 0b00100, 0b01110, 0b10101,
-                  0b10101, 0b01110, 0b00100, 0b01110
-                 };
 
 void setup() {
   // Initialise the LCD, start the backlight and print a "bootup" message for two seconds
@@ -262,11 +228,11 @@ void encChange() {
           // by a neat little trick, using operator % in conjunction with division
           // We then compare these variables with the maximum value for our
           // frequency, if all is good, make the change
-          unsigned long newFrequency = frequency + power(10, digitPos);
+          unsigned long newFrequency = frequency + pow(10, digitPos);
           unsigned char dispDigit =
-            frequency % power(10, digitPos + 1) / power(10, digitPos);
+            frequency % pow(10, digitPos + 1) / pow(10, digitPos);
           if (newFrequency <= maxFrequency && dispDigit < 9) {
-            frequency += power(10, digitPos);
+            frequency += pow(10, digitPos);
             updateDisplay = true;
           }
 
@@ -284,11 +250,11 @@ void encChange() {
           // A better implementation would be to use increment of pi/4 or submultiples of
           // pi where 2pi = 4096
 #ifdef usePhase
-          unsigned long newPhase = phase + power(10, digitPos);
+          unsigned long newPhase = phase + pow(10, digitPos);
           unsigned char dispDigit =
-            phase % power(10, digitPos + 1) / power(10, digitPos);
+            phase % pow(10, digitPos + 1) / pow(10, digitPos);
           if (newPhase < maxPhase && dispDigit < 9) {
-            phase += power(10, digitPos);
+            phase += pow(10, digitPos);
             updateDisplay = true;
           }
 #endif
@@ -314,11 +280,11 @@ void encChange() {
         } break;
 
       case 2: {
-          unsigned long newFrequency = frequency + power(10, digitPos);
-          unsigned char dispDigit =
-            frequency % power(10, digitPos + 1) / power(10, digitPos);
+          unsigned long newFrequency = frequency + pow(10, digitPos);
+          unsigned char dispDigit = frequency % pow(10, digitPos + 1) / pow(10, digitPos);
+
           if (newFrequency > 0 && dispDigit > 0) {
-            frequency -= power(10, digitPos);
+            frequency -= pow(10, digitPos);
             updateDisplay = true;
           }
 
@@ -335,11 +301,11 @@ void encChange() {
           // A better implementation would be to use increment of pi/4 or submultiples of
           // pi where 2pi = 4096
 #ifdef usePhase
-          unsigned long newPhase = phase + power(10, digitPos);
+          unsigned long newPhase = phase + pow(10, digitPos);
           unsigned char dispDigit =
-            phase % power(10, digitPos + 1) / power(10, digitPos);
+            phase % pow(10, digitPos + 1) / pow(10, digitPos);
           if (newPhase > 0 && dispDigit > 0) {
-            phase -= power(10, digitPos);
+            phase -= pow(10, digitPos);
             updateDisplay = true;
           }
 #endif
@@ -361,9 +327,9 @@ void displayFrequency() {
   lcd.setCursor(0, 0);
   lcd.print("f=");
   for (int i = 7; i >= 0; i--) {
-    unsigned char dispDigit = frequencyToDisplay / power(10, i);
+    unsigned char dispDigit = frequencyToDisplay / pow(10, i);
     lcd.print(dispDigit);
-    frequencyToDisplay -= dispDigit * power(10, i);
+    frequencyToDisplay -= dispDigit * pow(10, i);
   }
   lcd.print("Hz");
 }
@@ -385,9 +351,9 @@ void displayPhase() {
   lcd.write(0);
   lcd.print("=");
   for (int i = 3; i >= 0; i--) {
-    unsigned int dispDigit = phaseToDisplay / power(10, i);
+    unsigned int dispDigit = phaseToDisplay / pow(10, i);
     lcd.print(dispDigit);
-    phaseToDisplay -= dispDigit * power(10, i);
+    phaseToDisplay -= dispDigit * pow(10, i);
   }
 }
 // Function to display the FREQ register (either 0 or 1) in the bottom left
@@ -398,15 +364,5 @@ void displayFreqRegister() {
   lcd.print(freqRegister);
 }
 
-unsigned long power(int a, int b) {
-  unsigned long res;
-  if (b == 0) {
-    res = 1;
-  } else {
-    res = a;
-    for (int i = 0; i < (b - 1); i++) {
-      res *= a;
-    }
-  }
-  return res;
-}
+
+
