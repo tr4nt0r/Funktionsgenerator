@@ -1,7 +1,7 @@
 // definitions.h
 
 
-const String _SIGGEN_VERSION_ = "Version 0.1pre-alpha";
+const PROGMEM String __FIRMWARE_VERSION__ = "0.1pre-alpha" ;
 
 //Uncomment the line below if you want to change the Phase instead of the FREQ register
 //#define usePhase
@@ -15,6 +15,7 @@ const uint32_t AD9833_ClkFreq = 24000000;
 
 const uint8_t TFT_CS = 9;
 const uint8_t TFT_DC = 8;
+const uint8_t TFT_RST = 10;
 
 // Variables used to input data and walk through menu
 unsigned long encValue;        // Value used by encoder
@@ -38,7 +39,7 @@ const String powerState[] = { " ON", "OFF" };
 const String mode[] = { "SIN", "TRI", "CLK" };
 // Variables used to store phase, frequency, mode and power
 unsigned char currentMode = 0;
-unsigned long frequency0 = 1048;
+unsigned long frequency0 = 100;
 unsigned long frequency1 = 1000;
 unsigned long frequency = frequency0;
 unsigned long currFrequency; // Current frequency used, either 0 or 1
@@ -53,10 +54,23 @@ uint8_t phi[8] = { 0b01110, 0b00100, 0b01110, 0b10101,
 
 
 
-#define PINK 0xE14A
-#define GREEN 0x5725
-#define BLUE 0x2F38
-#define PURPLE 0x615C
+#define ROSEPINK 0xFCB3
+#define APPLEGREEN 0x5725
+#define LIGHTBLUE 0x07FF
+#define PALEVIOLET 0xBD5F
+#define AQUA 0x1759
+#define CERULEAN 0x03F8
+
+// Color definitions
+#define BLACK    0x0000
+#define BLUE     0x001F
+#define RED      0xF800
+#define GREEN    0x07E0
+#define CYAN     0x07FF
+#define MAGENTA  0xF81F
+#define YELLOW   0xFFE0 
+#define WHITE    0xFFFF
+
 // 'sappz', 91x33px
 const uint8_t sappz[96 * 38] PROGMEM = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,

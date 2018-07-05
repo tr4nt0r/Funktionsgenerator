@@ -1,22 +1,26 @@
+
 #include <gfxfont.h>
 #include <Adafruit_SPITFT_Macros.h>
 #include <Adafruit_SPITFT.h>
 #include <Adafruit_GFX.h>
-#include <Adafruit_ILI9341.h>
+//#include <Adafruit_ILI9341.h>
+#include <Adafruit_ST7735.h>
 #include "definitions.h"
 #include "AD9833.h"
 #include "Rotary.h"
+#include <Fonts\Org_01.h>
 
 
 
 
 AD9833 sigGen(AD9833_FsyncPin, 24000000); // Initialise our AD9833 with FSYNC pin = 10 and a master clock frequency of 24MHz
-LiquidCrystal_I2C lcd(0x27, 16, 2); // LCD Initialise
+//LiquidCrystal_I2C lcd(0x27, 16, 2); // LCD Initialise
 Rotary encoder(rotEncPinA, rotEncPinB);// Initialise the encoder on pins 2 and 3 (interrupt pins)
-Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+//Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC);
 
 void setup() {
-	Serial.begin(115200);
+	//Serial.begin(9600);
 	initTFT();
 	printBootUpMsg();
 	displayFrequency();
@@ -321,9 +325,9 @@ void encChange() {
 void displayFrequency() {
   unsigned long frequencyToDisplay = frequency;
   
-  tft.setCursor(0, 0);
-  tft.setTextColor(ILI9341_WHITE);
-  tft.setTextSize(3);
+  tft.setCursor(4, 10);
+  tft.setTextColor(GREEN);
+  tft.setTextSize(1);
   tft.print(F("F="));
 
   if (frequency >= 1000000) {
@@ -333,23 +337,23 @@ void displayFrequency() {
 	  tft.print(frequency / 1000.0, 3);
 	  tft.print(F(" MHz"));
   } else {
-	  tft.print(frequency, 0);
+	  tft.print(frequency);
 	  tft.print(F(" Hz"));
   }
  
 }
 // Function to display power state (ON/OFF) in the top right corner
 void displayPower() {
-	tft.setCursor(0, 30);
-	tft.setTextColor(ILI9341_WHITE);
-	tft.setTextSize(3);
+	tft.setCursor(4, 30);
+	tft.setTextColor(GREEN);
+	tft.setTextSize(1);
 	tft.print(powerState[currentPowerState]);
 }
 // Function to display the mode in the bottom right corner
 void displayMode() {
-	tft.setTextColor(ILI9341_WHITE);
-	tft.setTextSize(3);
-	tft.setCursor(0, 60);
+	tft.setTextColor(GREEN);
+	tft.setTextSize(1);
+	tft.setCursor(4, 60);
 	tft.print(mode[currentMode]);
 }
 // Function to display the mode in the bottom left corner
@@ -368,9 +372,9 @@ void displayPhase() {
 // Function to display the FREQ register (either 0 or 1) in the bottom left
 // corner
 void displayFreqRegister() {
-	tft.setCursor(0, 90);
-	tft.setTextSize(3);
-	tft.setTextColor(ILI9341_WHITE);
+	tft.setCursor(4, 90);
+	tft.setTextSize(1);
+	tft.setTextColor(GREEN);
 	tft.print("Preset ");
 	tft.print(freqRegister);
 	
@@ -383,51 +387,50 @@ void displayFreqRegister() {
 
 void initTFT() {
 
-	tft.begin();
-
-	// read diagnostics (optional but can help debug problems)
-	uint8_t x = tft.readcommand8(ILI9341_RDMODE);
-	Serial.print(F("Display Power Mode: 0x")); Serial.println(x, HEX);
-	x = tft.readcommand8(ILI9341_RDMADCTL);
-	Serial.print(F("MADCTL Mode: 0x")); Serial.println(x, HEX);
-	x = tft.readcommand8(ILI9341_RDPIXFMT);
-	Serial.print(F("Pixel Format: 0x")); Serial.println(x, HEX);
-	x = tft.readcommand8(ILI9341_RDIMGFMT);
-	Serial.print(F("Image Format: 0x")); Serial.println(x, HEX);
-	x = tft.readcommand8(ILI9341_RDSELFDIAG);
-	Serial.print(F("Self Diagnostic: 0x")); Serial.println(x, HEX);
-	Serial.println(F("Done!"));
-
-	tft.setRotation(3);
-
-	tft.fillScreen(PINK);
+	//tft.begin();
+	
+	tft.initR(INITR_GREENTAB);
+	tft.setRotation(1);
+	tft.invertDisplay(true);
+	tft.setTextWrap(false);
+	tft.setFont(&Org_01);
 }
 
 void printBootUpMsg() {
-	tft.fillScreen(PINK);
-	tft.drawRect(0, 0, tft.width(), tft.height() / 5, ILI9341_BLACK);
-	tft.fillRect(0, 0, tft.width(), tft.height() / 5, BLUE);
+	tft.fillScreen(BLACK);
+	tft.fillRect(0, 0, tft.width(), tft.height() / 5, AQUA);
+	tft.fillRect(0, tft.height() / 5 + 4, tft.width(), tft.height() *4/5  , CERULEAN);
 
-	tft.setTextColor(PINK);
 
-	printAlignCenter(F("Signal Generator"), 3, tft.width() / 2, tft.height() / 10);
-	tft.drawBitmap(tft.width() / 2 - 48, tft.height() / 2 -19, sappz, 96, 38, PINK, ILI9341_BLACK);
-	tft.setTextColor(ILI9341_BLACK);
+	tft.setTextColor(BLACK);
 
-	printAlignCenter(_SIGGEN_VERSION_, 2, tft.width()/2, 200);
-	printAlignLeft(F("Powered by"), 1, tft.width() / 2 - 48 - 5, tft.height() / 2 + 10);
-	delay(2000);
-	tft.fillScreen(ILI9341_BLACK);
+	printAlignCenter(F("Signal Generator"), 2, tft.width() / 2, tft.height() / 10);
+	tft.drawBitmap(tft.width() / 2 - 48, tft.height() / 2 -19, sappz, 96, 38, CERULEAN, BLACK);
+	tft.setTextColor(BLACK);
+
+	printAlignCenter(__FIRMWARE_VERSION__, 1, tft.width()/2, tft.height()-tft.height()/5);
+	printAlignCenter(F("Powered by"), 1, tft.width() / 2, tft.height() / 2 -25);
+	delay(30000);
+	tft.fillScreen(BLACK);
+	tft.drawRect(0, 0, tft.width(), tft.height(), GREEN);
 }
 
 
-void printAlignCenter(const String text, uint8_t s, uint16_t x, uint16_t y) {
-	tft.setCursor(x - text.length() * 3 * s, y - 4 * s);
-	tft.setTextSize(s);
-	tft.print(text);
+void printAlignCenter(String text, uint8_t s, int16_t x, int16_t y) {
+	int16_t x1, y1;
+	uint16_t w, h;
+	tft.setTextSize(s);	
+	tft.getTextBounds(text.c_str(), 0, 0, &x1, &y1, &w, &h);
+
+	if (y == y1) {
+		tft.setCursor(x - w / 2, y - h / 2);
+	} else {
+		tft.setCursor(x - w / 2, y + h / 2);
+	}
+	tft.println(text);
 }
 
-void printAlignLeft(const String text, uint8_t s, uint16_t x, uint16_t y) {
+void printAlignLeft(const String text, uint8_t s, int16_t x, int16_t y) {
 	tft.setCursor(x - text.length() * 6 * s, y - 4 * s);
 	tft.setTextSize(s);
 	tft.print(text);
