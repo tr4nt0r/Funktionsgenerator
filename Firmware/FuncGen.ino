@@ -1,7 +1,5 @@
 
 #include <gfxfont.h>
-#include <Adafruit_SPITFT_Macros.h>
-#include <Adafruit_SPITFT.h>
 #include <Adafruit_GFX.h>
 //#include <Adafruit_ILI9341.h>
 #include <Adafruit_ST7735.h>
@@ -398,14 +396,14 @@ void initTFT() {
 
 void printBootUpMsg() {
 	tft.fillScreen(BLACK);
-	tft.fillRect(0, 0, tft.width(), tft.height() / 5, AQUA);
-	tft.fillRect(0, tft.height() / 5 + 4, tft.width(), tft.height() *4/5  , CERULEAN);
+	tft.fillRect(0, 0, tft.width(), tft.height() / 5, HOTMAGENTA);
+	tft.fillRect(0, tft.height() / 5 + 4, tft.width(), tft.height() *4/5  , PALEVIOLET);
 
 
-	tft.setTextColor(BLACK);
+	tft.setTextColor(MINTYGREEN);
 
 	printAlignCenter(F("Signal Generator"), 2, tft.width() / 2, tft.height() / 10);
-	tft.drawBitmap(tft.width() / 2 - 48, tft.height() / 2 -19, sappz, 96, 38, CERULEAN, BLACK);
+	tft.drawBitmap(tft.width() / 2 - 48, tft.height() / 2 -19, sappz, 96, 38, PALEVIOLET, BLACK);
 	tft.setTextColor(BLACK);
 
 	printAlignCenter(__FIRMWARE_VERSION__, 1, tft.width()/2, tft.height()-tft.height()/5);
@@ -419,8 +417,9 @@ void printBootUpMsg() {
 void printAlignCenter(String text, uint8_t s, int16_t x, int16_t y) {
 	int16_t x1, y1;
 	uint16_t w, h;
+
 	tft.setTextSize(s);	
-	tft.getTextBounds(text.c_str(), 0, 0, &x1, &y1, &w, &h);
+	tft.getTextBounds((char*)text.c_str(), 0, 0, &x1, &y1, &w, &h);
 
 	if (y == y1) {
 		tft.setCursor(x - w / 2, y - h / 2);

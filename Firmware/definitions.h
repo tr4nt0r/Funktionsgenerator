@@ -15,7 +15,6 @@ const uint32_t AD9833_ClkFreq = 24000000;
 
 const uint8_t TFT_CS = 9;
 const uint8_t TFT_DC = 8;
-const uint8_t TFT_RST = 10;
 
 // Variables used to input data and walk through menu
 unsigned long encValue;        // Value used by encoder
@@ -53,13 +52,20 @@ uint8_t phi[8] = { 0b01110, 0b00100, 0b01110, 0b10101,
 
 
 
-
+//some colors based on https://xkcd.com/color/rgb/ 
 #define ROSEPINK 0xFCB3
 #define APPLEGREEN 0x5725
 #define LIGHTBLUE 0x07FF
 #define PALEVIOLET 0xBD5F
 #define AQUA 0x1759
 #define CERULEAN 0x03F8
+#define HOTMAGENTA 0xE078
+#define SAPPHIRE 0x3995
+#define MINTYGREEN 0x176E
+#define TOPAZ 0x3618
+#define MUDBROWN 0x6A64
+#define PISSYELLOW 0xEF00
+#define DULLORANGE 0xCC69
 
 // Color definitions
 #define BLACK    0x0000
