@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="2" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="5" altunitdist="mil" altunit="mil"/>
+<grid distance="25" unitdist="mil" unit="mil" style="lines" multiple="1" display="yes" altdistance="5" altunitdist="mil" altunit="mil"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
@@ -23,17 +23,17 @@
 <layer number="13" name="Route13" color="4" fill="5" visible="no" active="no"/>
 <layer number="14" name="Route14" color="1" fill="6" visible="no" active="no"/>
 <layer number="15" name="Route15" color="4" fill="6" visible="no" active="no"/>
-<layer number="16" name="Bottom" color="1" fill="1" visible="no" active="yes"/>
+<layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
 <layer number="17" name="Pads" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="18" name="Vias" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="yes"/>
 <layer number="20" name="Dimension" color="24" fill="1" visible="yes" active="yes"/>
 <layer number="21" name="tPlace" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="22" name="bPlace" color="7" fill="1" visible="no" active="yes"/>
+<layer number="22" name="bPlace" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="23" name="tOrigins" color="15" fill="1" visible="yes" active="yes"/>
-<layer number="24" name="bOrigins" color="15" fill="1" visible="no" active="yes"/>
+<layer number="24" name="bOrigins" color="15" fill="1" visible="yes" active="yes"/>
 <layer number="25" name="tNames" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="26" name="bNames" color="7" fill="1" visible="no" active="yes"/>
+<layer number="26" name="bNames" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="27" name="tValues" color="7" fill="1" visible="no" active="yes"/>
 <layer number="28" name="bValues" color="7" fill="1" visible="no" active="yes"/>
 <layer number="29" name="tStop" color="7" fill="3" visible="no" active="yes"/>
@@ -47,9 +47,9 @@
 <layer number="37" name="tTest" color="7" fill="1" visible="no" active="yes"/>
 <layer number="38" name="bTest" color="7" fill="1" visible="no" active="yes"/>
 <layer number="39" name="tKeepout" color="4" fill="11" visible="yes" active="yes"/>
-<layer number="40" name="bKeepout" color="1" fill="11" visible="no" active="yes"/>
+<layer number="40" name="bKeepout" color="1" fill="11" visible="yes" active="yes"/>
 <layer number="41" name="tRestrict" color="4" fill="10" visible="yes" active="yes"/>
-<layer number="42" name="bRestrict" color="1" fill="10" visible="no" active="yes"/>
+<layer number="42" name="bRestrict" color="1" fill="10" visible="yes" active="yes"/>
 <layer number="43" name="vRestrict" color="2" fill="10" visible="no" active="yes"/>
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="yes"/>
 <layer number="45" name="Holes" color="7" fill="1" visible="yes" active="yes"/>
@@ -59,7 +59,7 @@
 <layer number="49" name="Reference" color="7" fill="1" visible="no" active="yes"/>
 <layer number="50" name="dxf" color="7" fill="1" visible="no" active="no"/>
 <layer number="51" name="tDocu" color="7" fill="1" visible="yes" active="yes"/>
-<layer number="52" name="bDocu" color="7" fill="1" visible="no" active="yes"/>
+<layer number="52" name="bDocu" color="7" fill="1" visible="yes" active="yes"/>
 <layer number="53" name="tGND_GNDA" color="7" fill="9" visible="no" active="no"/>
 <layer number="54" name="bGND_GNDA" color="1" fill="9" visible="no" active="no"/>
 <layer number="56" name="wert" color="7" fill="1" visible="no" active="no"/>
@@ -178,8 +178,6 @@ OUTPUT</text>
 <text x="0" y="-0.254" size="0.1016" layer="200" font="vector" distance="0">C:/Users/manni/Downloads/copper_max.bmp</text>
 <text x="0" y="-0.381" size="0.1524" layer="200" font="vector" distance="0">C:/Users/manni/Downloads/copper_max.bmp</text>
 <text x="0" y="-0.3175" size="0.127" layer="200" font="vector">C:/Users/manni/Downloads/copper_max.bmp</text>
-<text x="0" y="-0.254" size="0.1016" layer="42" font="vector" rot="MR0">C:/Users/dem40095/Downloads/flat,800x800,075,f.u5.bmp</text>
-<text x="0" y="-0.127" size="0.0508" layer="42" font="vector" rot="MR0">C:/Users/dem40095/Downloads/flat,800x800,075,f.u5.bmp</text>
 <rectangle x1="8.1026" y1="29.0322" x2="8.1534" y2="29.083" layer="42"/>
 <rectangle x1="8.3058" y1="29.0322" x2="8.3566" y2="29.083" layer="42"/>
 <rectangle x1="8.509" y1="29.0322" x2="8.8646" y2="29.083" layer="42"/>
@@ -1735,7 +1733,6 @@ OUTPUT</text>
 <rectangle x1="8.9662" y1="42.291" x2="9.0678" y2="42.3418" layer="42"/>
 <rectangle x1="6.985" y1="42.3418" x2="7.1374" y2="42.3926" layer="42"/>
 <rectangle x1="7.0358" y1="42.3926" x2="7.0866" y2="42.4434" layer="42"/>
-<text x="0" y="-0.254" size="0.1016" layer="42" font="vector" rot="MR0">C:/Users/dem40095/Downloads/404px-sam_and_max_sth.bmp</text>
 </plain>
 <libraries>
 <library name="resistor" urn="urn:adsk.eagle:library:348">
@@ -2944,25 +2941,6 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="-5.7" y1="2.4" x2="5.7" y2="2.4" width="0.254" layer="21"/>
 <wire x1="-5.7" y1="-2.4" x2="5.7" y2="-2.4" width="0.254" layer="21"/>
 </package>
-<package name="EEEFT(C)">
-<description>&lt;b&gt;EEEFT(C)&lt;/b&gt;&lt;br&gt;
-</description>
-<smd name="1" x="-1.95" y="0" dx="2.75" dy="1.6" layer="1"/>
-<smd name="2" x="1.95" y="0" dx="2.75" dy="1.6" layer="1"/>
-<text x="-0.36" y="0.092" size="1.27" layer="27" align="center">&gt;VALUE</text>
-<text x="-0.36" y="0.092" size="1.27" layer="25" align="center">&gt;NAME</text>
-<wire x1="-2.65" y1="2.65" x2="2.65" y2="2.65" width="0.2" layer="51"/>
-<wire x1="2.65" y1="2.65" x2="2.65" y2="-2.65" width="0.2" layer="51"/>
-<wire x1="2.65" y1="-2.65" x2="-2.65" y2="-2.65" width="0.2" layer="51"/>
-<wire x1="-2.65" y1="-2.65" x2="-2.65" y2="2.65" width="0.2" layer="51"/>
-<wire x1="-2.65" y1="2.65" x2="2.65" y2="2.65" width="0.2" layer="21"/>
-<wire x1="2.65" y1="-2.65" x2="-2.65" y2="-2.65" width="0.2" layer="21"/>
-<wire x1="-2.65" y1="-2.65" x2="-2.65" y2="-1.1" width="0.2" layer="21"/>
-<wire x1="-2.65" y1="2.65" x2="-2.65" y2="1.1" width="0.2" layer="21"/>
-<wire x1="2.65" y1="2.65" x2="2.65" y2="1.1" width="0.2" layer="21"/>
-<wire x1="2.65" y1="-2.65" x2="2.65" y2="-1.1" width="0.2" layer="21"/>
-<circle x="-3.965" y="-0.76" radius="0.081740625" width="0.2" layer="25"/>
-</package>
 <package name="CFPS-72">
 <description>&lt;b&gt;CFPS-72&lt;/b&gt;&lt;br&gt;
 </description>
@@ -3026,6 +3004,25 @@ for trimmer refence see : &lt;u&gt;www.electrospec-inc.com/cross_references/trim
 <wire x1="-2.15" y1="2.15" x2="2.15" y2="2.15" width="0.2" layer="21"/>
 <wire x1="2.15" y1="-2.15" x2="-2.15" y2="-2.15" width="0.2" layer="21"/>
 <circle x="-3.918" y="0.019" radius="0.066" width="0.2" layer="25"/>
+</package>
+<package name="CAPPM7344X310N">
+<description>&lt;b&gt;CASE D&lt;/b&gt;&lt;br&gt;
+</description>
+<smd name="1" x="-3.1" y="0" dx="2.5" dy="2.3" layer="1" rot="R90"/>
+<smd name="2" x="3.1" y="0" dx="2.5" dy="2.3" layer="1" rot="R90"/>
+<text x="0" y="0" size="1.27" layer="25" align="center">&gt;NAME</text>
+<text x="0" y="0" size="1.27" layer="27" align="center">&gt;VALUE</text>
+<wire x1="-4.5" y1="2.5" x2="4.5" y2="2.5" width="0.05" layer="51"/>
+<wire x1="4.5" y1="2.5" x2="4.5" y2="-2.5" width="0.05" layer="51"/>
+<wire x1="4.5" y1="-2.5" x2="-4.5" y2="-2.5" width="0.05" layer="51"/>
+<wire x1="-4.5" y1="-2.5" x2="-4.5" y2="2.5" width="0.05" layer="51"/>
+<wire x1="-3.65" y1="2.175" x2="3.65" y2="2.175" width="0.1" layer="51"/>
+<wire x1="3.65" y1="2.175" x2="3.65" y2="-2.175" width="0.1" layer="51"/>
+<wire x1="3.65" y1="-2.175" x2="-3.65" y2="-2.175" width="0.1" layer="51"/>
+<wire x1="-3.65" y1="-2.175" x2="-3.65" y2="2.175" width="0.1" layer="51"/>
+<wire x1="-3.65" y1="1.025" x2="-2.5" y2="2.175" width="0.1" layer="51"/>
+<wire x1="3.65" y1="2.175" x2="-4.25" y2="2.175" width="0.2" layer="21"/>
+<wire x1="-3.65" y1="-2.175" x2="3.65" y2="-2.175" width="0.2" layer="21"/>
 </package>
 </packages>
 </library>
@@ -3484,19 +3481,7 @@ design rules under a new name.</description>
 </element>
 <element name="P1" library="display-TFT-1.8-KMR" package="DISPLAY_TFT_1,8-KMR" value="" x="22.86" y="24.13" rot="R270"/>
 <element name="R1" library="resistor" library_urn="urn:adsk.eagle:library:348" package="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="10k" x="26.035" y="42.545"/>
-<element name="C1" library="resistor" library_urn="urn:adsk.eagle:library:348" package="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100nF" x="16.8275" y="36.5125"/>
-<element name="C3" library="SamacSys_Parts" package="EEEFT(C)" value="EEEFT1V470AR" x="6.985" y="23.8125">
-<attribute name="ALLIED_NUMBER" value="70256704" x="6.985" y="23.8125" size="1.778" layer="27" display="off"/>
-<attribute name="ALLIED_PRICE/STOCK" value="https://www.alliedelec.com/panasonic-eee-ft1v470ar/70256704/" x="6.985" y="23.8125" size="1.778" layer="27" display="off"/>
-<attribute name="ARROW_PART_NUMBER" value="EEEFT1V470AR" x="6.985" y="23.8125" size="1.778" layer="27" display="off"/>
-<attribute name="ARROW_PRICE/STOCK" value="https://www.arrow.com/en/products/eeeft1v470ar/panasonic" x="6.985" y="23.8125" size="1.778" layer="27" display="off"/>
-<attribute name="DESCRIPTION" value="FT SMT Al elec capacitor 47uF 35V Panasonic 47F 35 V dc Aluminium Electrolytic Capacitor C, FT SMD Series 2000h 5 Dia. x 5.8mm" x="6.985" y="23.8125" size="1.778" layer="27" display="off"/>
-<attribute name="HEIGHT" value="mm" x="6.985" y="23.8125" size="1.778" layer="27" display="off"/>
-<attribute name="MANUFACTURER_NAME" value="Panasonic" x="6.985" y="23.8125" size="1.778" layer="27" display="off"/>
-<attribute name="MANUFACTURER_PART_NUMBER" value="EEEFT1V470AR" x="6.985" y="23.8125" size="1.778" layer="27" display="off"/>
-<attribute name="RS_PART_NUMBER" value="7296261P" x="6.985" y="23.8125" size="1.778" layer="27" display="off"/>
-<attribute name="RS_PRICE/STOCK" value="http://uk.rs-online.com/web/p/products/7296261P" x="6.985" y="23.8125" size="1.778" layer="27" display="off"/>
-</element>
+<element name="C1" library="resistor" library_urn="urn:adsk.eagle:library:348" package="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100n" x="16.8275" y="36.5125"/>
 <element name="JP1" library="pinhead" library_urn="urn:adsk.eagle:library:325" package="2X03" package3d_urn="urn:adsk.eagle:package:22462/2" value="" x="41.91" y="34.6075" rot="MR90"/>
 <element name="Y2" library="SamacSys_Parts" package="CFPS-72" value="24.0MHz CFPS-72" x="48.26" y="16.8275" rot="R180">
 <attribute name="ARROW_PART_NUMBER" value="4.0MHz CFPS-72 50ppm -40+85C 5V" x="48.26" y="16.8275" size="1.778" layer="27" rot="R180" display="off"/>
@@ -3519,8 +3504,8 @@ design rules under a new name.</description>
 <attribute name="RS_PART_NUMBER" value="5236428" x="41.91" y="22.5425" size="1.778" layer="27" display="off"/>
 <attribute name="RS_PRICE/STOCK" value="http://uk.rs-online.com/web/p/products/5236428" x="41.91" y="22.5425" size="1.778" layer="27" display="off"/>
 </element>
-<element name="C8" library="resistor" library_urn="urn:adsk.eagle:library:348" package="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100nF" x="36.195" y="22.5425"/>
-<element name="C7" library="resistor" library_urn="urn:adsk.eagle:library:348" package="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100nF" x="31.75" y="24.4475"/>
+<element name="C8" library="resistor" library_urn="urn:adsk.eagle:library:348" package="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100n" x="36.195" y="22.5425"/>
+<element name="C7" library="resistor" library_urn="urn:adsk.eagle:library:348" package="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100n" x="31.75" y="24.4475"/>
 <element name="C9" library="SamacSys_Parts" package="FKV(B)" value="EEEFK1C100AR" x="38.735" y="27.305" rot="R180">
 <attribute name="ALLIED_NUMBER" value="70256491" x="38.735" y="27.305" size="1.778" layer="27" rot="R180" display="off"/>
 <attribute name="ALLIED_PRICE/STOCK" value="https://www.alliedelec.com/panasonic-eee-fk1c100ar/70256491/" x="38.735" y="27.305" size="1.778" layer="27" rot="R180" display="off"/>
@@ -3538,8 +3523,8 @@ design rules under a new name.</description>
 <element name="R3" library="resistor" library_urn="urn:adsk.eagle:library:348" package="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="1,3k" x="25.4" y="16.1925" rot="R180"/>
 <element name="R2" library="resistor" library_urn="urn:adsk.eagle:library:348" package="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="1,3k" x="19.685" y="22.5425"/>
 <element name="R5" library="resistor" library_urn="urn:adsk.eagle:library:348" package="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="10k" x="25.4" y="13.6525" rot="R180"/>
-<element name="C11" library="resistor" library_urn="urn:adsk.eagle:library:348" package="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100nF" x="19.685" y="20.0025" rot="R180"/>
-<element name="C12" library="resistor" library_urn="urn:adsk.eagle:library:348" package="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100nF" x="19.685" y="17.4625"/>
+<element name="C11" library="resistor" library_urn="urn:adsk.eagle:library:348" package="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100n" x="19.685" y="20.0025" rot="R180"/>
+<element name="C12" library="resistor" library_urn="urn:adsk.eagle:library:348" package="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100n" x="19.685" y="17.4625"/>
 <element name="X7" library="con-molex" library_urn="urn:adsk.eagle:library:165" package="22-23-2021" value="22-23-2021" x="50.4825" y="7.3025" rot="MR180">
 <attribute name="MF" value="MOLEX" x="50.4825" y="7.3025" size="1.778" layer="28" rot="MR180" display="off"/>
 <attribute name="MPN" value="22-23-2021" x="50.4825" y="7.3025" size="1.778" layer="28" rot="MR180" display="off"/>
@@ -3565,8 +3550,8 @@ design rules under a new name.</description>
 <attribute name="OC_NEWARK" value="30C0862" x="27.305" y="7.3025" size="1.778" layer="28" rot="MR180" display="off"/>
 </element>
 <element name="IC5" library="linear" library_urn="urn:adsk.eagle:library:262" package="SO08" package3d_urn="urn:adsk.eagle:package:16404/2" value="LM318D" x="18.415" y="28.2575" rot="R90"/>
-<element name="C13" library="resistor" library_urn="urn:adsk.eagle:library:348" package="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100nF" x="13.97" y="23.1775" rot="R270"/>
-<element name="C14" library="resistor" library_urn="urn:adsk.eagle:library:348" package="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100nF" x="19.685" y="25.0825" rot="R180"/>
+<element name="C13" library="resistor" library_urn="urn:adsk.eagle:library:348" package="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100n" x="13.97" y="23.1775" rot="R270"/>
+<element name="C14" library="resistor" library_urn="urn:adsk.eagle:library:348" package="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100n" x="19.685" y="25.0825" rot="R180"/>
 <element name="R6" library="resistor" library_urn="urn:adsk.eagle:library:348" package="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="10k" x="18.415" y="32.0675" rot="R180"/>
 <element name="R4" library="resistor" library_urn="urn:adsk.eagle:library:348" package="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="10k" x="16.51" y="23.1775" rot="R90"/>
 <element name="X1" library="con-molex" library_urn="urn:adsk.eagle:library:165" package="22-23-2051" value="22-23-2051" x="50.038" y="40.64" rot="MR270">
@@ -3575,12 +3560,24 @@ design rules under a new name.</description>
 <attribute name="OC_FARNELL" value="1462952" x="50.038" y="40.64" size="1.778" layer="28" rot="MR270" display="off"/>
 <attribute name="OC_NEWARK" value="38C9178" x="50.038" y="40.64" size="1.778" layer="28" rot="MR270" display="off"/>
 </element>
+<element name="C15" library="SamacSys_Parts" package="CAPPM7344X310N" value="TAJD476K010R" x="6.1976" y="23.5712">
+<attribute name="ALLIED_NUMBER" value="70475107" x="6.1976" y="23.5712" size="1.778" layer="27" display="off"/>
+<attribute name="ALLIED_PRICE/STOCK" value="https://www.alliedelec.com/avx-tajd476k010r/70475107/" x="6.1976" y="23.5712" size="1.778" layer="27" display="off"/>
+<attribute name="ARROW_PART_NUMBER" value="TAJD476K010R" x="6.1976" y="23.5712" size="1.778" layer="27" display="off"/>
+<attribute name="ARROW_PRICE/STOCK" value="http://uk.rs-online.com/web/p/products/4648224" x="6.1976" y="23.5712" size="1.778" layer="27" display="off"/>
+<attribute name="DESCRIPTION" value="AVX 47F SMD Solid MnO2 Tantalum Electrolytic Capacitor, 10 V dc 10%, TAJ Series" x="6.1976" y="23.5712" size="1.778" layer="27" display="off"/>
+<attribute name="HEIGHT" value="3.1mm" x="6.1976" y="23.5712" size="1.778" layer="27" display="off"/>
+<attribute name="MANUFACTURER_NAME" value="AVX" x="6.1976" y="23.5712" size="1.778" layer="27" display="off"/>
+<attribute name="MANUFACTURER_PART_NUMBER" value="TAJD476K010R" x="6.1976" y="23.5712" size="1.778" layer="27" display="off"/>
+<attribute name="RS_PART_NUMBER" value="4648224" x="6.1976" y="23.5712" size="1.778" layer="27" display="off"/>
+<attribute name="RS_PRICE/STOCK" value="http://uk.rs-online.com/web/p/products/4648224" x="6.1976" y="23.5712" size="1.778" layer="27" display="off"/>
+</element>
+<element name="R7" library="resistor" library_urn="urn:adsk.eagle:library:348" package="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="22" x="39.37" y="45.72" rot="MR270"/>
 </elements>
 <signals>
 <signal name="VCC">
 <contactref element="IC2" pad="4"/>
 <contactref element="R1" pad="1"/>
-<contactref element="C3" pad="1"/>
 <contactref element="IC1" pad="18"/>
 <contactref element="JP1" pad="2"/>
 <contactref element="IC1" pad="4"/>
@@ -3590,19 +3587,13 @@ design rules under a new name.</description>
 <wire x1="11.43" y1="19.1575" x2="11.38" y2="19.1075" width="0.3048" layer="1"/>
 <contactref element="Y2" pad="4"/>
 <contactref element="C6" pad="2"/>
-<wire x1="2.54" y1="40.3225" x2="3.175" y2="40.9575" width="0.3048" layer="1"/>
-<wire x1="2.54" y1="24.4475" x2="2.54" y2="40.3225" width="0.3048" layer="1"/>
+<wire x1="3.175" y1="40.9575" x2="2.54" y2="40.3225" width="0.3048" layer="1"/>
 <contactref element="C7" pad="2"/>
 <contactref element="IC3" pad="2"/>
 <contactref element="C9" pad="1"/>
 <contactref element="C10" pad="1"/>
 <wire x1="50.82" y1="14.7075" x2="50.8" y2="14.7275" width="0.3048" layer="1"/>
 <wire x1="11.38" y1="19.1075" x2="9.85" y2="20.6375" width="0.3048" layer="1"/>
-<wire x1="9.85" y1="20.6375" x2="6.35" y2="20.6375" width="0.3048" layer="1"/>
-<wire x1="6.35" y1="20.6375" x2="5.035" y2="21.9525" width="0.3048" layer="1"/>
-<wire x1="5.035" y1="21.9525" x2="5.035" y2="23.8125" width="0.3048" layer="1"/>
-<wire x1="5.035" y1="23.8125" x2="3.175" y2="23.8125" width="0.3048" layer="1"/>
-<wire x1="3.175" y1="23.8125" x2="2.54" y2="24.4475" width="0.3048" layer="1"/>
 <wire x1="50.8" y1="14.7275" x2="53.955" y2="14.7275" width="0.3048" layer="1"/>
 <wire x1="53.955" y1="14.7275" x2="53.975" y2="14.7075" width="0.3048" layer="1"/>
 <wire x1="43.18" y1="32.0675" x2="42.3672" y2="31.2547" width="0.3048" layer="1"/>
@@ -3613,7 +3604,6 @@ design rules under a new name.</description>
 <wire x1="32.6" y1="25.2875" x2="32.6" y2="24.4475" width="0.3048" layer="1"/>
 <wire x1="30.5825" y1="27.725" x2="31.4325" y2="28.575" width="0.3048" layer="1"/>
 <wire x1="30.5825" y1="27.725" x2="30.5825" y2="27.305" width="0.3048" layer="1"/>
-<contactref element="P1" pad="LED+"/>
 <contactref element="P1" pad="VCC"/>
 <wire x1="17.78" y1="36.615" x2="17.6775" y2="36.5125" width="0.3048" layer="1"/>
 <wire x1="17.78" y1="40.9575" x2="17.78" y2="36.615" width="0.3048" layer="1"/>
@@ -3656,17 +3646,22 @@ design rules under a new name.</description>
 <wire x1="40.9806625" y1="39.6875" x2="44.14408125" y2="39.6875" width="0.3048" layer="1"/>
 <wire x1="40.64" y1="41.91" x2="40.64" y2="40.0281625" width="0.3048" layer="1"/>
 <wire x1="40.64" y1="40.0281625" x2="40.9806625" y2="39.6875" width="0.3048" layer="1"/>
-<wire x1="40.64" y1="41.91" x2="40.64" y2="43.815" width="0.3048" layer="16"/>
 <wire x1="25.9495" y1="45.8495" x2="35.81061875" y2="45.8495" width="0.3048" layer="1"/>
 <wire x1="25.185" y1="45.085" x2="25.9495" y2="45.8495" width="0.3048" layer="1"/>
 <wire x1="39.75011875" y1="41.91" x2="40.64" y2="41.91" width="0.3048" layer="1"/>
 <wire x1="35.81061875" y1="45.8495" x2="39.75011875" y2="41.91" width="0.3048" layer="1"/>
-<wire x1="40.64" y1="43.815" x2="39.37" y2="45.085" width="0.3048" layer="16"/>
-<wire x1="39.37" y1="45.085" x2="39.37" y2="49.53" width="0.3048" layer="16"/>
 <wire x1="6.35" y1="44.7675" x2="6.35" y2="49.53" width="0.3048" layer="16"/>
 <wire x1="50.8" y1="14.7275" x2="52.5272" y2="16.4547" width="0.3048" layer="1"/>
 <wire x1="52.5272" y1="22.7203" x2="48.26" y2="26.9875" width="0.3048" layer="1"/>
 <wire x1="52.5272" y1="16.4547" x2="52.5272" y2="22.7203" width="0.3048" layer="1"/>
+<contactref element="C15" pad="1"/>
+<wire x1="9.85" y1="20.6375" x2="6.0313" y2="20.6375" width="0.3048" layer="1"/>
+<wire x1="6.0313" y1="20.6375" x2="3.0976" y2="23.5712" width="0.3048" layer="1"/>
+<wire x1="2.54" y1="40.3225" x2="2.54" y2="24.1288" width="0.3048" layer="1"/>
+<wire x1="2.54" y1="24.1288" x2="3.0976" y2="23.5712" width="0.3048" layer="1"/>
+<contactref element="R7" pad="2"/>
+<wire x1="40.64" y1="41.91" x2="40.64" y2="43.6" width="0.3048" layer="16"/>
+<wire x1="40.64" y1="43.6" x2="39.37" y2="44.87" width="0.3048" layer="16"/>
 </signal>
 <signal name="GND">
 <contactref element="C2" pad="1"/>
@@ -3676,7 +3671,6 @@ design rules under a new name.</description>
 <contactref element="IC1" pad="5"/>
 <contactref element="IC1" pad="21"/>
 <contactref element="IC1" pad="3"/>
-<contactref element="C3" pad="2"/>
 <contactref element="JP1" pad="6"/>
 <contactref element="C1" pad="1"/>
 <contactref element="Y2" pad="2"/>
@@ -3719,6 +3713,7 @@ design rules under a new name.</description>
 <wire x1="31.6375" y1="36.195" x2="31.555" y2="36.2775" width="0.3048" layer="1"/>
 <wire x1="31.555" y1="36.2775" x2="36.1125" y2="36.2775" width="0.3048" layer="1"/>
 <wire x1="36.1125" y1="36.2775" x2="36.195" y2="36.195" width="0.3048" layer="1"/>
+<contactref element="C15" pad="2"/>
 </signal>
 <signal name="+12V">
 <contactref element="IC2" pad="1"/>
@@ -4020,7 +4015,7 @@ design rules under a new name.</description>
 <contactref element="C14" pad="2"/>
 <contactref element="R4" pad="1"/>
 <wire x1="40.64" y1="18.7325" x2="40.64" y2="20.6375" width="0.3048" layer="1"/>
-<wire x1="47.625" y1="16.1925" x2="46.99" y2="16.8275" width="0.3048" layer="1"/>
+<wire x1="46.99" y1="16.8275" x2="47.625" y2="16.1925" width="0.3048" layer="1"/>
 <wire x1="40.64" y1="18.7325" x2="42.545" y2="16.8275" width="0.3048" layer="1"/>
 <wire x1="42.545" y1="16.8275" x2="46.99" y2="16.8275" width="0.3048" layer="1"/>
 <wire x1="18.835" y1="22.5425" x2="18.62" y2="22.3275" width="0.3048" layer="1"/>
@@ -4219,6 +4214,11 @@ design rules under a new name.</description>
 <vertex x="0.0508" y="42.9768"/>
 </polygon>
 </signal>
+<signal name="N$18">
+<contactref element="P1" pad="LED+"/>
+<contactref element="R7" pad="1"/>
+<wire x1="39.37" y1="46.57" x2="39.37" y2="49.53" width="0.3048" layer="16"/>
+</signal>
 </signals>
 <errors>
 <approved hash="20,16,21d42ccfda758dbc"/>
@@ -4228,6 +4228,40 @@ design rules under a new name.</description>
 <approved hash="3,16,487b4a794a79487b"/>
 <approved hash="3,16,997b9b799b79997b"/>
 <approved hash="2,20,a158ac5662506f5e"/>
+<approved hash="4,1,badc963a241dbd66"/>
+<approved hash="4,1,4bcba92eef14667e"/>
+<approved hash="4,1,c0c72c2c12122b77"/>
+<approved hash="4,1,7761558af3a88ace"/>
+<approved hash="4,1,af168decdbca52a8"/>
+<approved hash="4,1,a1568fb285981ce5"/>
+<approved hash="4,1,a858f4beca8043e2"/>
+<approved hash="4,1,132071c8078e1ee9"/>
+<approved hash="4,1,022f3ed09cfa959c"/>
+<approved hash="4,1,fd312bd619d82081"/>
+<approved hash="4,1,a40490e08ed217b3"/>
+<approved hash="4,1,19f52716ad24a442"/>
+<approved hash="4,1,15a44344010a286d"/>
+<approved hash="4,1,1ca0c84cb6765f10"/>
+<approved hash="4,1,48a527a8840021f7"/>
+<approved hash="4,1,b078afb43ce7220a"/>
+<approved hash="4,1,e64302a0089601f3"/>
+<approved hash="4,1,1e1e7afe1038295f"/>
+<approved hash="4,16,e64302a0089601f3"/>
+<approved hash="4,16,1e1e7afe1038295f"/>
+<approved hash="4,16,badc963a241dbd66"/>
+<approved hash="4,16,4bcba92eef14667e"/>
+<approved hash="4,16,c0c72c2c12122b77"/>
+<approved hash="4,16,7761558af3a88ace"/>
+<approved hash="4,16,af168decdbca52a8"/>
+<approved hash="4,16,a1568fb285981ce5"/>
+<approved hash="4,16,a858f4beca8043e2"/>
+<approved hash="4,16,132071c8078e1ee9"/>
+<approved hash="4,16,022f3ed09cfa959c"/>
+<approved hash="4,16,fd312bd619d82081"/>
+<approved hash="4,16,a40490e08ed217b3"/>
+<approved hash="4,16,19f52716ad24a442"/>
+<approved hash="4,16,15a44344010a286d"/>
+<approved hash="4,16,1ca0c84cb6765f10"/>
 </errors>
 </board>
 </drawing>
