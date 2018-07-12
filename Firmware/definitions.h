@@ -6,9 +6,25 @@ const PROGMEM String __FIRMWARE_VERSION__ = "0.1pre-alpha" ;
 //Uncomment the line below if you want to change the Phase instead of the FREQ register
 //#define usePhase
 
-const uint8_t buttonPin = 1;
-const uint8_t rotEncPinA = 2;
-const uint8_t rotEncPinB = 3;
+const uint8_t rotaryEncoderPinBtn = 1;
+const uint8_t rotaryEncoderPinA = 3;
+const uint8_t rotaryEncoderPinB = 2;
+int16_t rotaryEncoderLastPos = -1;
+int16_t rotaryEncoderPos = 0;
+
+#define DIR_NONE 0
+#define DIR_CW 1
+#define DIR_CCW -1
+
+enum Menu {
+	Null,
+	Settings,
+	Power,
+	PhaseRegister,
+	FrequencyRegister,	
+	FrequencySet
+
+};
 
 const uint8_t AD9833_FsyncPin = 10;
 const uint32_t AD9833_ClkFreq = 24000000;
@@ -24,13 +40,13 @@ unsigned char settingsPos[] = { 0, 14, 20, 29 };
 unsigned char button;
 volatile unsigned char cursorPos = 0;
 unsigned char lastCursorPos = 0;
-unsigned char menuState = 0;
+Menu menuState = Null;
 
 int digitPos = 0;
 const unsigned long maxFrequency = 14000000;
 const unsigned int maxPhase = 4095; // Only used if you enable PHASE setting instead of FREQ register
 unsigned long newFrequency = 1000;
-volatile bool updateDisplay = false;
+volatile bool updateDisplay = true;
 
 int freqRegister = 0; // Default FREQ register is 0
 					  // LCD constants

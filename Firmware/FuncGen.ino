@@ -1,35 +1,27 @@
 
+
 #include <gfxfont.h>
 #include <Adafruit_GFX.h>
-//#include <Adafruit_ILI9341.h>
 #include <Adafruit_ST7735.h>
 #include "definitions.h"
 #include "AD9833.h"
-#include "Rotary.h"
 #include <Fonts\Org_01.h>
+#include <TimerOne.h>
+#include "libraries\ClickEncoder\ClickEncoder.h"
 
 
 
 
 AD9833 sigGen(AD9833_FsyncPin, 24000000); // Initialise our AD9833 with FSYNC pin = 10 and a master clock frequency of 24MHz
-//LiquidCrystal_I2C lcd(0x27, 16, 2); // LCD Initialise
-Rotary encoder(rotEncPinA, rotEncPinB);// Initialise the encoder on pins 2 and 3 (interrupt pins)
-//Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+ClickEncoder encoder(rotaryEncoderPinA, rotaryEncoderPinB, rotaryEncoderPinBtn, 4);
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC);
 
 void setup() {
-	//Serial.begin(9600);
 	initTFT();
 	printBootUpMsg();
-	displayFrequency();
-	displayMode();
-#ifdef usePhase
-	displayPhase();
-#endif
-	displayPower();
-#ifndef usePhase
-	displayFreqRegister();
-#endif
+	updateDisplay = true;
+	displayChange();
+
   // Initialise the AD9833 with 1KHz sine output, no phase shift for both
   // registers and remain on the FREQ0 register
   // sigGen.lcdDebugInit(&lcd);
@@ -43,35 +35,26 @@ void setup() {
   sigGen.mode(currentMode);
   sigGen.reset(0);
 
-  // Set pins A and B from encoder as interrupts
-  attachInterrupt(digitalPinToInterrupt(2), encChange, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(3), encChange, CHANGE);
-  // Initialise pin as input with pull-up enabled and debounce variable for
-  // encoder button
-  pinMode(1, INPUT_PULLUP);
-  lastButtonPress = millis();
-  lastButtonState = 1;
-  button = 1;
+  Timer1.initialize(1000);
+  Timer1.attachInterrupt(ISRcallback);
+
+  encoder.setAccelerationEnabled(true); 
+
   // Set Cursor to initial possition
   //lcd.setCursor(0, 0);
 }
 
+//Interrupt Service Routine 
+void ISRcallback() {
+	encoder.service();
+}
+
 void loop() {
   // Check to see if the button has been pressed
-  checkButton();
-  // Update display if needed
-  if (updateDisplay == true) {
-    displayFrequency();
-#ifdef usePhase
-    displayPhase();
-#endif
-    displayPower();
-#ifndef usePhase
-    displayFreqRegister();
-#endif
-    displayMode();
-    updateDisplay = false;
-  }
+  ClickEncoder::Button button = encoder.getButton();
+
+
+
   // We are using the variable menuState to know where we are in the menu and
   // what to do in case we press the button or increment/drecrement via the
   // encoder
@@ -80,137 +63,166 @@ void loop() {
   // Pick a setting (menuState 1)
   // Change that particular setting and save settings (menuState 2-5)
 
-  switch (menuState) {
-    // Default state
-    case 0: {
-        //lcd.noBlink();
-        if (button == 0) {
-          button = 1;
-          //lcd.setCursor(0, 0);
-          //lcd.blink();
-          menuState = 1;
-          cursorPos = 0;
-        }
-      } break;
-    // Settings mode
-    case 1: {
-        if (button == 0) {
-          button = 1;
-          // If the setting in Power just toggle between on and off
-          if (cursorPos == 1) {
-            currentPowerState = abs(1 - currentPowerState);
-            updateDisplay = true;
-            menuState = 0;
-            if (currentPowerState == 1)
-              sigGen.sleep(3); // Both DAC and clock turned OFF
-            else
-              sigGen.sleep(0); // DAC and clock are turned ON
-          }
-          // If usePhase has not been set
-#ifndef usePhase
-          else if (cursorPos == 2) {
-            updateDisplay = true;
-            menuState = 0; // return to "main menu"
-            if (freqRegister == 0) {
-              freqRegister = 1;
-              sigGen.setFPRegister(1);
-              frequency = frequency1;
-            } else {
-              freqRegister = 0;
-              sigGen.setFPRegister(0);
-              frequency = frequency0;
-            }
-          }
-#endif
-          // Otherwise just set a new state
-          else
-            menuState = cursorPos + 2;
-        }
-        // Move the cursor position in case it changed
-        if (lastCursorPos != cursorPos) {
-          unsigned char realPosR = 0;
-          unsigned char realPosC;
-          if (settingsPos[cursorPos] < 16)
-            realPosC = settingsPos[cursorPos];
-          else {
-            realPosC = settingsPos[cursorPos] - 16;
-            realPosR = 1;
-          }
-          //lcd.setCursor(realPosC, realPosR);
-          lastCursorPos = cursorPos;
-        }
-      } break;
-    // Frequency setting
-    case 2: {
-        // Each button press will either enable to change the value of another digit
-        // or if all digits have been changed, to apply the setting
-        if (button == 0) {
-          button = 1;
-          if (digitPos < 7)
-            digitPos++;
-          else {
-            digitPos = 0;
-            menuState = 0;
-            sigGen.setFreq(frequency);
-          }
-        } else if (button == 2) {
-          button = 1;
-          digitPos = 0;
-          menuState = 0;
-        }
-        // Set the blinking cursor on the digit you can currently modify
-        //lcd.setCursor(9 - digitPos, 0);
-      } break;
 
-    // Phase setting
-    case 4: {
-        if (button == 0) {
-          button = 1;
-          if (digitPos < 3)
-            digitPos++;
-          else {
-            digitPos = 0;
-            menuState = 0;
-            sigGen.setPhase(phase);
-          }
-        }
-        //lcd.setCursor(5 - digitPos, 1);
-      } break;
-    // Change the mode (sine/triangle/clock)
-    case 5: {
-        if (button == 0) {
-          button = 1;
-          menuState = 0;
-          sigGen.mode(currentMode);
-        }
-        //lcd.setCursor(13 ,1);
-      } break;
-    // Just in case we messed something up
-    default: {
-        menuState = 0;
-      }
-  }
+
+
+	  switch (menuState) {
+	  case Null:
+	  default:
+		  break;
+	  case Settings:
+		  break;
+	  case Power:
+		  break;
+		  case FrequencyRegister:
+			  break;
+		  case PhaseRegister:
+			  break;
+	  }
+
+  
+  
+
+//  switch (menuState) {
+//    // Default state
+//    case 0: {
+//        
+//          //button = 1;
+//          //lcd.setCursor(0, 0);
+//          //lcd.blink();
+//          menuState = 1;
+//          cursorPos = 0;
+//   
+//      } break;
+//    // Settings mode
+//    case 1: {
+//        if (button == 0) {
+//          //button = 1;
+//          // If the setting in Power just toggle between on and off
+//          if (cursorPos == 1) {
+//            currentPowerState = abs(1 - currentPowerState);
+//            updateDisplay = true;
+//            menuState = 0;
+//            if (currentPowerState == 1)
+//              sigGen.sleep(3); // Both DAC and clock turned OFF
+//            else
+//              sigGen.sleep(0); // DAC and clock are turned ON
+//          }
+//          // If usePhase has not been set
+//#ifndef usePhase
+//          else if (cursorPos == 2) {
+//            updateDisplay = true;
+//            menuState = 0; // return to "main menu"
+//            if (freqRegister == 0) {
+//              freqRegister = 1;
+//              sigGen.setFPRegister(1);
+//              frequency = frequency1;
+//            } else {
+//              freqRegister = 0;
+//              sigGen.setFPRegister(0);
+//              frequency = frequency0;
+//            }
+//          }
+//#endif
+//          // Otherwise just set a new state
+//          else
+//            menuState = cursorPos + 2;
+//        }
+//        // Move the cursor position in case it changed
+//        if (lastCursorPos != cursorPos) {
+//          unsigned char realPosR = 0;
+//          unsigned char realPosC;
+//          if (settingsPos[cursorPos] < 16)
+//            realPosC = settingsPos[cursorPos];
+//          else {
+//            realPosC = settingsPos[cursorPos] - 16;
+//            realPosR = 1;
+//          }
+//          //lcd.setCursor(realPosC, realPosR);
+//          lastCursorPos = cursorPos;
+//        }
+//      } break;
+//    // Frequency setting
+//    case 2: {
+//        // Each button press will either enable to change the value of another digit
+//        // or if all digits have been changed, to apply the setting
+//        if (button == 0) {
+//          //button = 1;
+//          if (digitPos < 7)
+//            digitPos++;
+//          else {
+//            digitPos = 0;
+//            menuState = 0;
+//            sigGen.setFreq(frequency);
+//          }
+//        } else if (button == 2) {
+//          //button = 1;
+//          digitPos = 0;
+//          menuState = 0;
+//        }
+//        // Set the blinking cursor on the digit you can currently modify
+//        //lcd.setCursor(9 - digitPos, 0);
+//      } break;
+//
+//    // Phase setting
+//    case 4: {
+//        if (button == 0) {
+//          //button = 1;
+//          if (digitPos < 3)
+//            digitPos++;
+//          else {
+//            digitPos = 0;
+//            menuState = 0;
+//            sigGen.setPhase(phase);
+//          }
+//        }
+//        //lcd.setCursor(5 - digitPos, 1);
+//      } break;
+//    // Change the mode (sine/triangle/clock)
+//    case 5: {
+//        if (button == 0) {
+//          //button = 1;
+//          menuState = 0;
+//          sigGen.mode(currentMode);
+//        }
+//        //lcd.setCursor(13 ,1);
+//      } break;
+//    // Just in case we messed something up
+//    default: {
+//        menuState = 0;
+//      }
+//  }
+
+  encChange();
 }
-// Function to debounce the button
-// 0 = pressed, 1 = depressed, 2 = long press
-void checkButton() {
-  if ((millis() - lastButtonPress) > 100) {
-    if (digitalRead(buttonPin) != lastButtonState) {
-      button = digitalRead(buttonPin);
-      lastButtonState = button;
-      lastButtonPress = millis();
-    }
-  }
-}
+
+
 
 void encChange() {
   // Depending in which menu state you are
   // the encoder will either change the value of a setting:
   //-+ frequency, change between FREQ0 and FREQ1 register (or -+ phase), On/Off, mode
   // or it will change the cursor position
-  unsigned char state = encoder.process();
+
+	
+	char rotaryEncoderDir = DIR_NONE;
+	int8_t rotaryEncoderMovement = rotaryEncoderPos - rotaryEncoderLastPos;
+	if (rotaryEncoderMovement != 0) {
+		rotaryEncoderDir = (rotaryEncoderMovement > 0) ? DIR_CW : DIR_CCW;
+	}
+	
+	
+
+  if (rotaryEncoderDir == DIR_CW) {
+	  printDebugMsg((String) rotaryEncoderPos);
+  } else if (rotaryEncoderDir == DIR_CCW) {
+	  printDebugMsg("<-");
+  } else if (rotaryEncoderDir == DIR_NONE){
+	  printDebugMsg("--");
+  }
+
   // Direction clockwise
-  if (state == DIR_CW) {
+  if (rotaryEncoderDir == DIR_CW) {
     switch (menuState) {
       case 1: {
           if (cursorPos == 3)
@@ -268,7 +280,7 @@ void encChange() {
     }
   }
   // Direction counter clockwise
-  else if (state == DIR_CCW) {
+  else if (rotaryEncoderDir == DIR_CCW) {
     switch (menuState) {
       case 1: {
           if (cursorPos == 0)
@@ -326,17 +338,21 @@ void displayFrequency() {
   tft.setCursor(4, 10);
   tft.setTextColor(GREEN);
   tft.setTextSize(1);
+  int16_t x1, y1;
+  uint16_t w, h;
+  tft.getTextBounds(F("F="), 4, 10, &x1, &y1, &w, &h);
+  tft.fillRect(x1, y1, tft.width() - 8, h, BLACK);
   tft.print(F("F="));
 
   if (frequency >= 1000000) {
 	  tft.print(frequency / 1000000.0, 4);
-	  tft.print(F(" GHz"));
+	  tft.println(F(" GHz"));
   } else if (frequency >= 1000) {
 	  tft.print(frequency / 1000.0, 3);
-	  tft.print(F(" MHz"));
+	  tft.println(F(" MHz"));
   } else {
 	  tft.print(frequency);
-	  tft.print(F(" Hz"));
+	  tft.println(F(" Hz"));
   }
  
 }
@@ -372,21 +388,41 @@ void displayPhase() {
 void displayFreqRegister() {
 	tft.setCursor(4, 90);
 	tft.setTextSize(1);
-	tft.setTextColor(GREEN);
+	tft.setTextColor(GREEN);	
 	tft.print("Preset ");
 	tft.print(freqRegister);
-	
-	//lcd.setCursor(0, 1);
-  //lcd.print("FREQ");
-  //lcd.print(freqRegister);
+}
+
+void displayChange() {
+	// Update display if needed
+	if (updateDisplay == true) {
+		displayFrequency();
+#ifdef usePhase
+		displayPhase();
+#endif
+		displayPower();
+#ifndef usePhase
+		displayFreqRegister();
+#endif
+		displayMode();
+		updateDisplay = false;
+	}
+}
+
+void printDebugMsg(String msg) {
+	tft.setTextSize(1);
+	tft.setTextColor(GREEN);
+	tft.setCursor(4, tft.height() - tft.height() / 5);
+	int16_t x1, y1;
+	uint16_t w, h;
+	tft.getTextBounds((char*)msg.c_str(), 4, tft.height() - tft.height() / 5, &x1, &y1, &w, &h);
+	tft.fillRect(x1, y1, tft.width(), h, BLACK);
+	tft.print(msg);
 }
 
 
 
 void initTFT() {
-
-	//tft.begin();
-	
 	tft.initR(INITR_GREENTAB);
 	tft.setRotation(1);
 	tft.invertDisplay(true);
@@ -408,10 +444,12 @@ void printBootUpMsg() {
 
 	printAlignCenter(__FIRMWARE_VERSION__, 1, tft.width()/2, tft.height()-tft.height()/5);
 	printAlignCenter(F("Powered by"), 1, tft.width() / 2, tft.height() / 2 -25);
-	delay(30000);
-	tft.fillScreen(BLACK);
-	tft.drawRect(0, 0, tft.width(), tft.height(), GREEN);
+	delay(2000);
+	tft.fillScreen(BLACK);	
 }
+
+
+
 
 
 void printAlignCenter(String text, uint8_t s, int16_t x, int16_t y) {
@@ -424,15 +462,9 @@ void printAlignCenter(String text, uint8_t s, int16_t x, int16_t y) {
 	if (y == y1) {
 		tft.setCursor(x - w / 2, y - h / 2);
 	} else {
-		tft.setCursor(x - w / 2, y + h / 2);
+		tft.setCursor(x - w / 2, y + h / 2);		
 	}
 	tft.println(text);
-}
-
-void printAlignLeft(const String text, uint8_t s, int16_t x, int16_t y) {
-	tft.setCursor(x - text.length() * 6 * s, y - 4 * s);
-	tft.setTextSize(s);
-	tft.print(text);
 }
 
 int pow(int base, int exp) {
