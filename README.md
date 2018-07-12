@@ -10,11 +10,10 @@ This work is based on this [howto](https://www.allaboutcircuits.com/projects/how
 - [x] create bill of materials
 - [x] order parts
 - [x] order milled circuit board 
-- [ ] build prototype on breadboard
 - [ ] build prototype on a milled circuit board
-- [ ] design and publish a laser cutted case
+- [x] design and publish a laser cutted case
 - [ ] modify microcontroller firmware for changed parts (atmega328pb and TFT Display)
-- [ ] publish source for microcontroller firmware 
+- [x] publish source for microcontroller firmware 
 - [ ] arrange labels for silkscreen on printed circuit board
 
 ## Bill of Materials
@@ -24,6 +23,7 @@ This work is based on this [howto](https://www.allaboutcircuits.com/projects/how
 | ---: | :--- | :--- | :--- | :--- | :--- | ---: |
 | 1 | | KMR-1.8 SPI ST7735R | | 1.8" TFT Display |  [eBay](https://www.ebay.de/sch/i.html?_from=R40&_trksid=m570.l1313&_nkw=1%2C8%22+tft+spi+st7735r&_sacat=0) | 2,88€ |
 | 1 | | SPDT | | Toggle switch for Front Panel Mount | [eBay](https://www.ebay.de/sch/i.html?_from=R40&_trksid=p2380057.m570.l1313.TR12.TRC2.A0.H0.Xtoggle+switch+12mm.TRS0&_nkw=toggle+switch+12mm&_sacat=0) | 3,00€ |
+| 1 |  | KY-040 | | Rotary Encoder mit Taster (Ausführung mit Gewinde am Schaft und Befestigungsmutter) |  [eBay](https://www.ebay.de/itm/Drehregler-Drehgeber-Rotary-Encoder-Arduino-KY-040-Potentiometer-Poti-Raspberry/252713917550?hash=item3ad6ec5c6e:g:pIYAAOSwn25aD28N)| 4€ |
 | 1 | 1,3k | Resistor | 0603 | | | 0,01€
 | 1 | 620 | Resistor | 0603 |||0,01€|
 | 8 | 100n | Capacitor | 0603 | | | 0,01€
