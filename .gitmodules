@@ -1,0 +1,3 @@
+[submodule "Firmware/libraries/ClickEncoder"]
+	path = Firmware/libraries/ClickEncoder
+	url = https://github.com/soligen2010/encoder.git
