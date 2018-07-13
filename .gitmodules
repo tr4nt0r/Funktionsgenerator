@@ -1,3 +1,12 @@
 [submodule "Firmware/libraries/ClickEncoder"]
 	path = Firmware/libraries/ClickEncoder
 	url = https://github.com/soligen2010/encoder.git
+[submodule "Firmware/libraries/TimerOne"]
+	path = Firmware/libraries/TimerOne
+	url = https://github.com/PaulStoffregen/TimerOne.git
+[submodule "Firmware/libraries/Adafruit_GFX"]
+	path = Firmware/libraries/Adafruit_GFX
+	url = https://github.com/adafruit/Adafruit-GFX-Library.git
+[submodule "Firmware/libraries/Adafruit_ST7735"]
+	path = Firmware/libraries/Adafruit_ST7735
+	url = https://github.com/adafruit/Adafruit-ST7735-Library.git

@@ -1,12 +1,12 @@
 
 
-#include <gfxfont.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_ST7735.h>
+#include "libraries\Adafruit_GFX\gfxfont.h"
+#include "libraries\Adafruit_GFX\Adafruit_GFX.h"
+#include "libraries\Adafruit_ST7735\Adafruit_ST7735.h"
 #include "definitions.h"
 #include "AD9833.h"
-#include <Fonts\Org_01.h>
-#include <TimerOne.h>
+#include "libraries\Adafruit_GFX\Fonts\Org_01.h"
+#include "libraries\TimerOne\TimerOne.h"
 #include "libraries\ClickEncoder\ClickEncoder.h"
 
 
@@ -14,17 +14,22 @@
 
 AD9833 sigGen(AD9833_FsyncPin, 24000000); // Initialise our AD9833 with FSYNC pin = 10 and a master clock frequency of 24MHz
 ClickEncoder encoder(rotaryEncoderPinA, rotaryEncoderPinB, rotaryEncoderPinBtn, 4);
-Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC);
+Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, 0);
+
+void callButtonEvent(ClickEncoder::Button button);
+void drawMainScreen();
+void drawMenuBar();
 
 void setup() {
 	initTFT();
-	printBootUpMsg();
+	displayBootUpMsg(); //display Bootscreen for 2s
+	drawMenuBar();
+	drawMainScreen(); //renders Mainscreen Boxes
 	updateDisplay = true;
-	displayChange();
+	displayChange();  //write values on MainScreen
 
   // Initialise the AD9833 with 1KHz sine output, no phase shift for both
   // registers and remain on the FREQ0 register
-  // sigGen.lcdDebugInit(&lcd);
   sigGen.reset(1);
   sigGen.setFreq(frequency0);
   sigGen.setPhase(phase);
@@ -38,7 +43,7 @@ void setup() {
   Timer1.initialize(1000);
   Timer1.attachInterrupt(ISRcallback);
 
-  encoder.setAccelerationEnabled(true); 
+  encoder.setAccelerationEnabled(true);  
 
   // Set Cursor to initial possition
   //lcd.setCursor(0, 0);
@@ -52,8 +57,10 @@ void ISRcallback() {
 void loop() {
   // Check to see if the button has been pressed
   ClickEncoder::Button button = encoder.getButton();
+  callButtonEvent(button);
 
-
+  
+  onRotaryEncoderTurnEvent();
 
   // We are using the variable menuState to know where we are in the menu and
   // what to do in case we press the button or increment/drecrement via the
@@ -66,22 +73,21 @@ void loop() {
 
 
 
-	  switch (menuState) {
-	  case Null:
-	  default:
-		  break;
-	  case Settings:
-		  break;
-	  case Power:
-		  break;
-		  case FrequencyRegister:
-			  break;
-		  case PhaseRegister:
-			  break;
-	  }
+  switch (menuSelected) {
+  case NullItem:
+  default:
+	  break;
+  case Settings:
+	  break;
+  case Power:
+	  break;
+  case FreqPreset:
+	  break;
+  case PhasePreset:
+	  break;
+  }
 
-  
-  
+
 
 //  switch (menuState) {
 //    // Default state
@@ -193,9 +199,115 @@ void loop() {
 //      }
 //  }
 
-  encChange();
+//  encChange();
 }
 
+void onRotaryEncoderTurnEvent() {
+
+	rotaryEncoderPos += encoder.getValue();
+	rotaryEncoderDir dir = DIR_NONE;
+
+	int8_t rotaryEncoderMovement = rotaryEncoderPos - rotaryEncoderLastPos;
+	if (rotaryEncoderMovement != 0) {
+		dir = (rotaryEncoderMovement > 0) ? DIR_CW : DIR_CCW;
+		rotaryEncoderLastPos = rotaryEncoderPos;
+	}
+	switch (dir) {
+	case DIR_NONE:
+		//nothing more todo here
+		break;
+	case DIR_CW:
+		displayDebugMsg("->");
+		break;
+	case DIR_CCW:
+		displayDebugMsg("<-");
+		break;
+	default:
+		break;
+	}
+
+
+	if (dir != DIR_NONE && menuSelected != NullItem && menuSelected != menuActive) {
+		if (menuSelected != getNextMenuItem(dir)) {
+			menuSelected = getNextMenuItem(dir);
+			drawMenuBar();
+		}
+	}
+}
+
+Menu getNextMenuItem(rotaryEncoderDir direction) {
+	uint8_t next = (int)menuSelected;
+	if (direction == DIR_CW) {
+		next++;
+		//if (next >= lastItem) next = 1; //navigation springt zum letzten Item weiter
+		if (next >= lastItem) next = menuSelected; //nur bis Anschlag links drehen
+	} else if (direction == DIR_CCW) {
+		next--;
+		//if (next <= NullItem) next = lastItem -1; //navigation beginnt bei 1
+		if (next <= NullItem) next = menuSelected; //nur bis Anschlag rechts drehen
+	}
+	return (Menu) next;
+}
+
+void callButtonEvent(ClickEncoder::Button button) {
+	switch (button) {
+	case ClickEncoder::Open:
+	default:
+		//	  
+		break;
+	case ClickEncoder::Clicked:
+		onClick();
+		break;
+	case ClickEncoder::DoubleClicked:
+		//onDblClick();
+		break;
+
+	case ClickEncoder::Held:
+		onButtonHold();
+		break;
+	case ClickEncoder::Released:
+		onButtonUp();
+		break;
+	}
+}
+
+void onButtonHold() {	
+	switch (menuSelected) {
+	case NullItem: //No Menu Item selected
+		if (menuActive == NullItem && !buttonIsHeld) {
+			menuSelected = FreqSet;
+			drawMenuBar();
+			displayDebugMsg(F("ButtonHold"));
+		}
+		break;
+	default:
+		if (!buttonIsHeld) { //close menu
+			menuSelected = NullItem;
+			menuActive = NullItem;
+			drawMenuBar();
+		}
+		break;
+	}
+	buttonIsHeld = true;
+};
+
+void onClick() {
+
+	if (menuSelected != NullItem && menuSelected != menuActive) {
+		menuActive = menuSelected;
+		drawMenuBar();
+	} else if (menuSelected != NullItem && menuSelected == menuActive) {
+		menuActive = NullItem;
+		drawMenuBar();
+	}
+}
+
+void onButtonUp() {
+	//reset button hold status
+	if (buttonIsHeld == true) {
+		buttonIsHeld = false;
+	}
+};
 
 
 void encChange() {
@@ -204,26 +316,11 @@ void encChange() {
   //-+ frequency, change between FREQ0 and FREQ1 register (or -+ phase), On/Off, mode
   // or it will change the cursor position
 
-	
-	char rotaryEncoderDir = DIR_NONE;
-	int8_t rotaryEncoderMovement = rotaryEncoderPos - rotaryEncoderLastPos;
-	if (rotaryEncoderMovement != 0) {
-		rotaryEncoderDir = (rotaryEncoderMovement > 0) ? DIR_CW : DIR_CCW;
-	}
-	
-	
 
-  if (rotaryEncoderDir == DIR_CW) {
-	  printDebugMsg((String) rotaryEncoderPos);
-  } else if (rotaryEncoderDir == DIR_CCW) {
-	  printDebugMsg("<-");
-  } else if (rotaryEncoderDir == DIR_NONE){
-	  printDebugMsg("--");
-  }
-
+	rotaryEncoderDir dir = DIR_NONE;
   // Direction clockwise
-  if (rotaryEncoderDir == DIR_CW) {
-    switch (menuState) {
+  if (dir == DIR_CW) {
+    switch (menuSelected) {
       case 1: {
           if (cursorPos == 3)
             cursorPos = 0;
@@ -280,8 +377,8 @@ void encChange() {
     }
   }
   // Direction counter clockwise
-  else if (rotaryEncoderDir == DIR_CCW) {
-    switch (menuState) {
+  else if (dir == DIR_CCW) {
+    switch (menuSelected) {
       case 1: {
           if (cursorPos == 0)
             cursorPos = 3;
@@ -394,6 +491,7 @@ void displayFreqRegister() {
 }
 
 void displayChange() {
+	return;
 	// Update display if needed
 	if (updateDisplay == true) {
 		displayFrequency();
@@ -409,18 +507,63 @@ void displayChange() {
 	}
 }
 
-void printDebugMsg(String msg) {
+void displayDebugMsg(String msg) {
+#ifdef DEBUG
 	tft.setTextSize(1);
 	tft.setTextColor(GREEN);
-	tft.setCursor(4, tft.height() - tft.height() / 5);
+	tft.setCursor(4, tft.height() - 20);
 	int16_t x1, y1;
 	uint16_t w, h;
-	tft.getTextBounds((char*)msg.c_str(), 4, tft.height() - tft.height() / 5, &x1, &y1, &w, &h);
-	tft.fillRect(x1, y1, tft.width(), h, BLACK);
+	tft.getTextBounds((char*)msg.c_str(), 4, tft.height()-20, &x1, &y1, &w, &h);
+	tft.fillRect(x1, y1, tft.width(), h, PALEVIOLET);
 	tft.print(msg);
+#endif // DEBUG
 }
 
+void drawMainScreen() {	
+	tft.fillRect(0, tft.height() / 5 + 4, tft.width(), tft.height() * 4 / 5, PALEVIOLET);	
+}
 
+void drawMenuBar() {
+
+	
+	tft.setTextSize(2);
+	tft.setCursor(4, 16);
+	if (menuSelected == menuActive && menuSelected != NullItem) {
+		tft.fillRect(0, 0, tft.width(), tft.height() / 5, CERULEAN);
+		tft.setTextColor(BLACK);
+	} else {
+		tft.fillRect(0, 0, tft.width(), tft.height() / 5, HOTMAGENTA);
+		tft.setTextColor(WHITE);
+	}
+	
+
+	switch (menuSelected) {
+	case NullItem: //leave MenuBar empty
+		//Menu Symbol
+		tft.drawBitmap(0, 0, menuButton, 24, 24, HOTMAGENTA, WHITE);
+		//draw power symbol
+		tft.drawBitmap(tft.width() - 20, 4, powerButton, 16, 16, HOTMAGENTA, (currentPowerState == true) ? APPLEGREEN : RED);
+
+	//	break;
+	//case FreqSet:		
+	//	break;
+	//case Mode:
+	//	break;
+	//case Power:
+	//	break;
+	//case PhasePreset:
+	//	break;
+	//case FreqPreset:
+	//	break;
+	//case Settings:
+	//	break;
+	default:
+		tft.print(MenuLabel[menuSelected]);
+		break;
+	}
+
+}
 
 void initTFT() {
 	tft.initR(INITR_GREENTAB);
@@ -430,7 +573,7 @@ void initTFT() {
 	tft.setFont(&Org_01);
 }
 
-void printBootUpMsg() {
+void displayBootUpMsg() {
 	tft.fillScreen(BLACK);
 	tft.fillRect(0, 0, tft.width(), tft.height() / 5, HOTMAGENTA);
 	tft.fillRect(0, tft.height() / 5 + 4, tft.width(), tft.height() *4/5  , PALEVIOLET);
@@ -444,7 +587,7 @@ void printBootUpMsg() {
 
 	printAlignCenter(__FIRMWARE_VERSION__, 1, tft.width()/2, tft.height()-tft.height()/5);
 	printAlignCenter(F("Powered by"), 1, tft.width() / 2, tft.height() / 2 -25);
-	delay(2000);
+	delay(1000);
 	tft.fillScreen(BLACK);	
 }
 
@@ -452,7 +595,7 @@ void printBootUpMsg() {
 
 
 
-void printAlignCenter(String text, uint8_t s, int16_t x, int16_t y) {
+void printAlignCenter(const String text, uint8_t s, int16_t x, int16_t y) {
 	int16_t x1, y1;
 	uint16_t w, h;
 
