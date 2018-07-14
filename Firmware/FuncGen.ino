@@ -1,20 +1,95 @@
 
 
-#include "libraries\Adafruit_GFX\gfxfont.h"
-#include "libraries\Adafruit_GFX\Adafruit_GFX.h"
-#include "libraries\Adafruit_ST7735\Adafruit_ST7735.h"
+#include <gfxfont.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_ST7735.h>
 #include "definitions.h"
 #include "AD9833.h"
-#include "libraries\Adafruit_GFX\Fonts\Org_01.h"
-#include "libraries\TimerOne\TimerOne.h"
-#include "libraries\ClickEncoder\ClickEncoder.h"
+#include <Fonts\Org_01.h>
+#include <TimerOne.h>
+#include <ClickEncoder.h>
 
 
 
 
 AD9833 sigGen(AD9833_FsyncPin, 24000000); // Initialise our AD9833 with FSYNC pin = 10 and a master clock frequency of 24MHz
 ClickEncoder encoder(rotaryEncoderPinA, rotaryEncoderPinB, rotaryEncoderPinBtn, 4);
-Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, 0);
+Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, -1);
+
+void drawMenuBar();
+void drawMainScreenWaveform(bool drawPartial = false);
+void onRotaryEncoderTurnEvent() {
+
+	rotaryEncoderPos += encoder.getValue();
+	rotaryEncoderDir dir = DIR_NONE;
+
+	int8_t rotaryEncoderMovement = rotaryEncoderPos - rotaryEncoderLastPos;
+	if (rotaryEncoderMovement != 0) {
+		dir = (rotaryEncoderMovement > 0) ? DIR_CW : DIR_CCW;
+		rotaryEncoderLastPos = rotaryEncoderPos;
+	}
+	else {
+		dir = DIR_NONE;
+	}
+
+	switch (dir) {
+	case DIR_NONE:
+		//nothing more todo here
+		break;
+	case DIR_CW:
+		displayDebugMsg("->");
+		break;
+	case DIR_CCW:
+		displayDebugMsg("<-");
+		break;
+	default:
+		break;
+	}
+
+	//navigate menu if no Menu item currently selected
+	if (dir != DIR_NONE && menuSelected != NullItem && menuSelected != menuActive) {
+		if (menuSelected != getNextMenuItem(dir)) {
+			menuSelected = getNextMenuItem(dir);
+			drawMenuBar();
+		}
+	}
+	//rotary encoder actions if a menu item is active
+	else if (dir != DIR_NONE && menuActive != NullItem) {
+		switch (menuSelected)
+		{
+		case NullItem:
+			break;
+		case FreqSet:
+			break;
+		case Mode:
+			if (dir == DIR_CW) {
+				if (selectedWaveform < 2) {
+					selectedWaveform++;
+					drawMainScreenWaveform(true);
+				}
+			}
+			else if (dir == DIR_CCW) {
+				if (selectedWaveform > 0) {
+					selectedWaveform--;
+					drawMainScreenWaveform(true);
+				}
+			}			
+			break;
+		case Power:
+			break;
+		case PhasePreset:
+			break;
+		case FreqPreset:
+			break;
+		case Settings:
+			break;
+		case lastItem:
+			break;
+		default:
+			break;
+		}
+	}
+}
 
 void callButtonEvent(ClickEncoder::Button button);
 void drawMainScreen();
@@ -37,7 +112,7 @@ void setup() {
   sigGen.setFreq(frequency1);
   sigGen.setPhase(phase);
   sigGen.setFPRegister(0);
-  sigGen.mode(currentMode);
+  sigGen.mode(selectedWaveform);
   sigGen.reset(0);
 
   Timer1.initialize(1000);
@@ -189,7 +264,7 @@ void loop() {
 //        if (button == 0) {
 //          //button = 1;
 //          menuState = 0;
-//          sigGen.mode(currentMode);
+//          sigGen.mode(selectedWaveform);
 //        }
 //        //lcd.setCursor(13 ,1);
 //      } break;
@@ -200,39 +275,6 @@ void loop() {
 //  }
 
 //  encChange();
-}
-
-void onRotaryEncoderTurnEvent() {
-
-	rotaryEncoderPos += encoder.getValue();
-	rotaryEncoderDir dir = DIR_NONE;
-
-	int8_t rotaryEncoderMovement = rotaryEncoderPos - rotaryEncoderLastPos;
-	if (rotaryEncoderMovement != 0) {
-		dir = (rotaryEncoderMovement > 0) ? DIR_CW : DIR_CCW;
-		rotaryEncoderLastPos = rotaryEncoderPos;
-	}
-	switch (dir) {
-	case DIR_NONE:
-		//nothing more todo here
-		break;
-	case DIR_CW:
-		displayDebugMsg("->");
-		break;
-	case DIR_CCW:
-		displayDebugMsg("<-");
-		break;
-	default:
-		break;
-	}
-
-
-	if (dir != DIR_NONE && menuSelected != NullItem && menuSelected != menuActive) {
-		if (menuSelected != getNextMenuItem(dir)) {
-			menuSelected = getNextMenuItem(dir);
-			drawMenuBar();
-		}
-	}
 }
 
 Menu getNextMenuItem(rotaryEncoderDir direction) {
@@ -259,7 +301,7 @@ void callButtonEvent(ClickEncoder::Button button) {
 		onClick();
 		break;
 	case ClickEncoder::DoubleClicked:
-		//onDblClick();
+		onDblClick();
 		break;
 
 	case ClickEncoder::Held:
@@ -271,20 +313,38 @@ void callButtonEvent(ClickEncoder::Button button) {
 	}
 }
 
-void onButtonHold() {	
+void onDblClick() {
 	switch (menuSelected) {
 	case NullItem: //No Menu Item selected
 		if (menuActive == NullItem && !buttonIsHeld) {
 			menuSelected = FreqSet;
 			drawMenuBar();
-			displayDebugMsg(F("ButtonHold"));
+		}
+		break;
+	default:
+			menuSelected = NullItem;
+			menuActive = NullItem;
+			drawMenuBar();
+			drawMainScreen();
+		break;
+	}
+}
+
+void onButtonHold() {	
+	switch (menuSelected) {
+	case NullItem: //No Menu Item selected
+		if (menuActive == NullItem && !buttonIsHeld) {
+			//menuSelected = FreqSet;
+			//drawMenuBar();
+			//displayDebugMsg(F("ButtonHold"));
 		}
 		break;
 	default:
 		if (!buttonIsHeld) { //close menu
-			menuSelected = NullItem;
-			menuActive = NullItem;
-			drawMenuBar();
+			//menuSelected = NullItem;
+			//menuActive = NullItem;
+			//drawMenuBar();
+			//drawMainScreen();
 		}
 		break;
 	}
@@ -296,10 +356,13 @@ void onClick() {
 	if (menuSelected != NullItem && menuSelected != menuActive) {
 		menuActive = menuSelected;
 		drawMenuBar();
+		drawMainScreen();
 	} else if (menuSelected != NullItem && menuSelected == menuActive) {
 		menuActive = NullItem;
 		drawMenuBar();
+		drawMainScreen();
 	}
+
 }
 
 void onButtonUp() {
@@ -368,10 +431,10 @@ void encChange() {
         } break;
 
       case 5: {
-          if (currentMode == 2)
-            currentMode = 0;
+          if (selectedWaveform == 2)
+            selectedWaveform = 0;
           else
-            currentMode++;
+            selectedWaveform++;
           updateDisplay = true;
         } break;
     }
@@ -419,10 +482,10 @@ void encChange() {
         } break;
 
       case 5: {
-          if (currentMode == 0)
-            currentMode = 2;
+          if (selectedWaveform == 0)
+            selectedWaveform = 2;
           else
-            currentMode--;
+            selectedWaveform--;
           updateDisplay = true;
         } break;
     }
@@ -465,7 +528,7 @@ void displayMode() {
 	tft.setTextColor(GREEN);
 	tft.setTextSize(1);
 	tft.setCursor(4, 60);
-	tft.print(mode[currentMode]);
+	tft.print(waveformLabel[selectedWaveform]);
 }
 // Function to display the mode in the bottom left corner
 // Only used if you enable PHASE setting instead of FREQ register
@@ -511,10 +574,10 @@ void displayDebugMsg(String msg) {
 #ifdef DEBUG
 	tft.setTextSize(1);
 	tft.setTextColor(GREEN);
-	tft.setCursor(4, tft.height() - 20);
+	tft.setCursor(4, 125);
 	int16_t x1, y1;
 	uint16_t w, h;
-	tft.getTextBounds((char*)msg.c_str(), 4, tft.height()-20, &x1, &y1, &w, &h);
+	tft.getTextBounds((char*)msg.c_str(), 4, 125, &x1, &y1, &w, &h);
 	tft.fillRect(x1, y1, tft.width(), h, PALEVIOLET);
 	tft.print(msg);
 #endif // DEBUG
@@ -522,15 +585,58 @@ void displayDebugMsg(String msg) {
 
 void drawMainScreen() {	
 	tft.fillRect(0, tft.height() / 5 + 4, tft.width(), tft.height() * 4 / 5, PALEVIOLET);	
+	switch (menuActive)
+	{
+	case NullItem:
+		break;
+	case FreqSet:
+		break;
+	case Mode:
+		drawMainScreenWaveform();
+		break;
+	case Power:
+		break;
+	case PhasePreset:
+		break;
+	case FreqPreset:
+		break;
+	case Settings:
+		break;
+	case lastItem:
+		break;
+	default:
+		break;
+	}
+}
+
+void drawMainScreenWaveform(bool drawPartial) {
+	//don't draw if partial redraw requested, reduces flickering
+	if (drawPartial == false) {
+		tft.setTextColor(BLACK);
+		tft.setTextSize(1);
+		tft.setCursor(4, 50);
+		tft.print(F("Select Waveform:"));
+
+		tft.drawBitmap(16, 59, sineWave32, 32, 32, PALEVIOLET, WHITE);
+		tft.drawBitmap(64, 59, triangleWave32, 32, 32, PALEVIOLET, WHITE);
+		tft.drawBitmap(112, 59, squareWave32, 32, 32, PALEVIOLET, WHITE);
+	}
+	tft.setTextColor(BLACK);
+	tft.fillRect(0, 95, tft.width(), 15, PALEVIOLET);
+	printAlignCenter(waveformLabel[selectedWaveform], 2, tft.width() / 2, 100);
+	//highlight active waveform by drawing a rectangle bihind the icon
+	tft.drawRect(14, 57, 36, 36, (selectedWaveform == 0) ? HOTMAGENTA : PALEVIOLET);
+	tft.drawRect(62, 57, 36, 36, (selectedWaveform == 1) ? HOTMAGENTA : PALEVIOLET);
+	tft.drawRect(110, 57, 36, 36, (selectedWaveform == 2) ? HOTMAGENTA : PALEVIOLET);
+
 }
 
 void drawMenuBar() {
-
 	
 	tft.setTextSize(2);
 	tft.setCursor(4, 16);
 	if (menuSelected == menuActive && menuSelected != NullItem) {
-		tft.fillRect(0, 0, tft.width(), tft.height() / 5, CERULEAN);
+		tft.fillRect(0, 0, tft.width(), tft.height() / 5, AQUA);
 		tft.setTextColor(BLACK);
 	} else {
 		tft.fillRect(0, 0, tft.width(), tft.height() / 5, HOTMAGENTA);
@@ -539,12 +645,27 @@ void drawMenuBar() {
 	
 
 	switch (menuSelected) {
-	case NullItem: //leave MenuBar empty
+	case NullItem:
 		//Menu Symbol
 		tft.drawBitmap(0, 0, menuButton, 24, 24, HOTMAGENTA, WHITE);
 		//draw power symbol
-		tft.drawBitmap(tft.width() - 20, 4, powerButton, 16, 16, HOTMAGENTA, (currentPowerState == true) ? APPLEGREEN : RED);
+		tft.drawBitmap(tft.width() - 25, 0, powerButton, 24, 24, (currentPowerState == true) ? APPLEGREEN : RED, HOTMAGENTA);
+		//draw waveform for current mode
 
+		switch (selectedWaveform)
+		{
+		case 0:
+		default:
+			tft.drawBitmap(tft.width() - 50, 0, sineWave24, 24, 24, WHITE, HOTMAGENTA);
+			break;
+		case 1:
+			tft.drawBitmap(tft.width() - 50, 0, triangleWave24, 24, 24, WHITE, HOTMAGENTA);
+			break;
+		case 2:
+			tft.drawBitmap(tft.width() - 50, 0, squareWave24, 24, 24, WHITE, HOTMAGENTA);
+			break;
+		}
+		
 	//	break;
 	//case FreqSet:		
 	//	break;
