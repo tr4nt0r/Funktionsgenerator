@@ -137,17 +137,6 @@ void loop() {
   
   onRotaryEncoderTurnEvent();
 
-  // We are using the variable menuState to know where we are in the menu and
-  // what to do in case we press the button or increment/drecrement via the
-  // encoder
-  // Enter setting mode if the button has been pressed and display blinking
-  // cursor over options (menuState 0)
-  // Pick a setting (menuState 1)
-  // Change that particular setting and save settings (menuState 2-5)
-
-
-
-
   switch (menuSelected) {
   case NullItem:
   default:
@@ -279,16 +268,13 @@ void loop() {
 
 Menu getNextMenuItem(rotaryEncoderDir direction) {
 	uint8_t next = (int)menuSelected;
-	if (direction == DIR_CW) {
+	if (direction == DIR_CW && next < lastItem - 1) {
 		next++;
-		//if (next >= lastItem) next = 1; //navigation springt zum letzten Item weiter
-		if (next >= lastItem) next = menuSelected; //nur bis Anschlag links drehen
-	} else if (direction == DIR_CCW) {
-		next--;
-		//if (next <= NullItem) next = lastItem -1; //navigation beginnt bei 1
-		if (next <= NullItem) next = menuSelected; //nur bis Anschlag rechts drehen
 	}
-	return (Menu) next;
+	else if (direction == DIR_CCW && next > NullItem + 1) {
+		next--;
+	}
+	return (Menu)next;
 }
 
 void callButtonEvent(ClickEncoder::Button button) {
@@ -334,9 +320,8 @@ void onButtonHold() {
 	switch (menuSelected) {
 	case NullItem: //No Menu Item selected
 		if (menuActive == NullItem && !buttonIsHeld) {
-			//menuSelected = FreqSet;
-			//drawMenuBar();
-			//displayDebugMsg(F("ButtonHold"));
+			togglePowerState();
+			drawMenuBar();
 		}
 		break;
 	default:
@@ -348,8 +333,12 @@ void onButtonHold() {
 		}
 		break;
 	}
-	buttonIsHeld = true;
+	buttonIsHeld = true;  //prevents repeated button held events
 };
+
+void togglePowerState() {
+	currentPowerState ^= true;
+}
 
 void onClick() {
 
@@ -360,7 +349,7 @@ void onClick() {
 	} else if (menuSelected != NullItem && menuSelected == menuActive) {
 		menuActive = NullItem;
 		drawMenuBar();
-		drawMainScreen();
+		//drawMainScreen();
 	}
 
 }
@@ -521,7 +510,7 @@ void displayPower() {
 	tft.setCursor(4, 30);
 	tft.setTextColor(GREEN);
 	tft.setTextSize(1);
-	tft.print(powerState[currentPowerState]);
+	//tft.print(powerState[currentPowerState]);
 }
 // Function to display the mode in the bottom right corner
 void displayMode() {
@@ -588,6 +577,8 @@ void drawMainScreen() {
 	switch (menuActive)
 	{
 	case NullItem:
+		if(menuSelected == NullItem)
+		drawMainScreenFrequency();
 		break;
 	case FreqSet:
 		break;
@@ -629,6 +620,34 @@ void drawMainScreenWaveform(bool drawPartial) {
 	tft.drawRect(62, 57, 36, 36, (selectedWaveform == 1) ? HOTMAGENTA : PALEVIOLET);
 	tft.drawRect(110, 57, 36, 36, (selectedWaveform == 2) ? HOTMAGENTA : PALEVIOLET);
 
+}
+
+void drawMainScreenFrequency() {
+	tft.setTextColor(BLACK);
+	tft.setCursor(4, 50);
+	tft.setTextSize(1);
+	tft.print(F("Frequency"));
+	String unit = F(" Hz");
+	float f = frequency;
+	char buffer[50];
+	if (frequency >= 1e+9) {
+		f = frequency / 1e+9F;
+		unit = F("GHz");
+	}
+	else if (frequency >= 1e+6) {
+		f = frequency / 1e+6F;
+		unit = F("MHz");
+	}
+	else if (frequency >= 1e+3) {
+		f = frequency / 1e+3F;
+		unit = F("kHz");
+	}
+
+	sprintf(buffer, "%d,%02d ", (int)f, (int)(f * 100) % 100);
+	printAlignCenter((String) buffer, 4, tft.width()/2, 75);
+	tft.setTextSize(3);
+	tft.setCursor(100, 110);
+	tft.print(unit);
 }
 
 void drawMenuBar() {

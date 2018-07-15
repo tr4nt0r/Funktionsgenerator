@@ -27,6 +27,7 @@ enum Menu {
 	PhasePreset,
 	FreqPreset,		
 	Settings,
+	Help,
 	lastItem
 };
 
@@ -38,6 +39,7 @@ const PROGMEM String MenuLabel[] = {
 	"PHASE",	
 	"PRESETS",
 	"SETTINGS",
+	"HELP"
 };
 
 const uint8_t AD9833_FsyncPin = 10;
@@ -63,11 +65,11 @@ volatile bool updateDisplay = true;
 
 int freqRegister = 0; // Default FREQ register is 0
 					  // LCD constants
-const PROGMEM String powerState[] = { " ON", "OFF" };
+//const PROGMEM String powerState[] = { " ON", "OFF" };
 const PROGMEM String waveformLabel[] = { "SINE", "TRINGLE", "SQUARE" };
 // Variables used to store phase, frequency, mode and power
 uint8_t selectedWaveform = 0;
-unsigned long frequency0 = 100;
+unsigned long frequency0 = 1000;
 unsigned long frequency1 = 1000;
 unsigned long frequency = frequency0;
 unsigned long currFrequency; // Current frequency used, either 0 or 1
