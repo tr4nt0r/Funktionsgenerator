@@ -8856,7 +8856,7 @@ Thermo-Sicherung um Value ergänzt, Port-to, Port-from um jeweils 2 Längentypen
 <part name="C10" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="10n"/>
 <part name="IC4" library="linear" library_urn="urn:adsk.eagle:library:262" deviceset="LM318" device="D" package3d_urn="urn:adsk.eagle:package:16404/2" value="LM318D"/>
 <part name="R3" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="1,3k"/>
-<part name="R2" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="1,3k"/>
+<part name="R2" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="680"/>
 <part name="R5" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-EU_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="10k"/>
 <part name="AGND2" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="AGND" device=""/>
 <part name="C11" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="C-EU" device="C0603" package3d_urn="urn:adsk.eagle:package:26138/1" value="100n"/>
@@ -8887,7 +8887,7 @@ Thermo-Sicherung um Value ergänzt, Port-to, Port-from um jeweils 2 Längentypen
 <part name="X1" library="con-molex" library_urn="urn:adsk.eagle:library:165" deviceset="22-23-2051" device=""/>
 <part name="P3" library="Symbols-Not-On-Board" deviceset="POT-NOT-ON-BOARD" device="" value="1k"/>
 <part name="BU1" library="Symbols-Not-On-Board" deviceset="BNC-BUCHSE-NOT-ON-BOARD" device=""/>
-<part name="P2" library="Symbols-Not-On-Board" deviceset="POT-NOT-ON-BOARD" device="" value="50k"/>
+<part name="P2" library="Symbols-Not-On-Board" deviceset="POT-NOT-ON-BOARD" device="" value="25k"/>
 <part name="S1" library="Symbols-Not-On-Board" deviceset="SWITCH-SPDT" device=""/>
 <part name="X2" library="Symbols-Not-On-Board" deviceset="ENCODER-SWITCH" device=""/>
 <part name="C15" library="SamacSys_Parts" deviceset="TAJD476K010R" device=""/>
@@ -9542,7 +9542,7 @@ Thermo-Sicherung um Value ergänzt, Port-to, Port-from um jeweils 2 Längentypen
 <label x="251.46" y="60.96" size="1.016" layer="95" xref="yes"/>
 </segment>
 </net>
-<net name="N$12" class="0">
+<net name="ROT_BTN" class="0">
 <segment>
 <wire x1="-10.16" y1="121.92" x2="-10.16" y2="130.81" width="0.1524" layer="91"/>
 <wire x1="-10.16" y1="130.81" x2="53.34" y2="130.81" width="0.1524" layer="91"/>
@@ -9553,7 +9553,7 @@ Thermo-Sicherung um Value ergänzt, Port-to, Port-from um jeweils 2 Längentypen
 <junction x="-10.16" y="121.92"/>
 </segment>
 </net>
-<net name="N$13" class="0">
+<net name="ROT_B" class="0">
 <segment>
 <pinref part="IC1" gate="G$1" pin="PD2_(PTCXY/INT0/OC3B/OC4B)"/>
 <wire x1="50.8" y1="123.19" x2="50.8" y2="124.46" width="0.1524" layer="91"/>
@@ -9564,7 +9564,7 @@ Thermo-Sicherung um Value ergänzt, Port-to, Port-from um jeweils 2 Längentypen
 <junction x="10.16" y="121.92"/>
 </segment>
 </net>
-<net name="N$14" class="0">
+<net name="ROT_A" class="0">
 <segment>
 <pinref part="IC1" gate="G$1" pin="(OC2B/INT1/PTCXY)_PD3"/>
 <wire x1="10.16" y1="111.76" x2="10.16" y2="80.01" width="0.1524" layer="91"/>
