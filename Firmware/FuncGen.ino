@@ -97,6 +97,7 @@ void changeFrequency(rotaryEncoderDir dir) {
 		if (dir == DIR_CCW && frequency <= step)
 			step = abs(frequency - 1);
 	}
+	displayDebugMsg((String) step);
 	frequency += (dir == DIR_CW) ? step : step*-1;
 
 }
@@ -679,8 +680,7 @@ void drawMainScreenFrequency(bool drawPartial) {
 		unit = F("Hz");
 		frequencyConverted = frequency;
 		frequenyConvertedDecimals = 0;
-	}
-	displayDebugMsg((String)frequenyConvertedDecimals);
+	}	
 	tft.fillRect(0, 65, tft.width(), 30, PALEVIOLET);
 	String output = (String)frequencyConverted;
 	if (frequency >= 1000) {
