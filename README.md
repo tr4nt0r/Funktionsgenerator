@@ -10,9 +10,9 @@ This work is based on this [howto](https://www.allaboutcircuits.com/projects/how
 - [x] create bill of materials
 - [x] order parts
 - [x] order milled circuit board 
-- [ ] build prototype on a milled circuit board
+- [x] build prototype on a milled circuit board
 - [x] design and publish a laser cutted case
-- [ ] modify microcontroller firmware for changed parts (atmega328pb and TFT Display)
+- [x] modify microcontroller firmware for changed parts (atmega328pb and TFT Display)
 - [x] publish source for microcontroller firmware 
 - [ ] arrange labels for silkscreen on printed circuit board
 
