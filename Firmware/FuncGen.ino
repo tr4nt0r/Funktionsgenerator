@@ -1,7 +1,8 @@
-
+﻿
 
 #include <gfxfont.h>
 #include <Adafruit_GFX.h>
+#include <Adafruit_ST77xx.h>
 #include <Adafruit_ST7735.h>
 #include "definitions.h"
 #include "AD9833.h"
@@ -16,8 +17,12 @@ AD9833 sigGen(AD9833_FsyncPin, 24000000); // Initialise our AD9833 with FSYNC pi
 ClickEncoder encoder(rotaryEncoderPinA, rotaryEncoderPinB, rotaryEncoderPinBtn, 4);
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, -1);
 
+//for some reason, compiler sometimes needs forward declaration ¯\_(ツ)_/¯ 
 void drawMenuBar();
 void drawMainScreenWaveform(bool drawPartial = false);
+void drawMainScreenFrequency(bool drawPartial = false);
+
+
 void onRotaryEncoderTurnEvent() {
 
 	rotaryEncoderPos += encoder.getValue();
@@ -27,23 +32,10 @@ void onRotaryEncoderTurnEvent() {
 	if (rotaryEncoderMovement != 0) {
 		dir = (rotaryEncoderMovement > 0) ? DIR_CW : DIR_CCW;
 		rotaryEncoderLastPos = rotaryEncoderPos;
-	}
+		isAccelerated = (abs(rotaryEncoderMovement) > 1) ? true : false;
+ 	}
 	else {
 		dir = DIR_NONE;
-	}
-
-	switch (dir) {
-	case DIR_NONE:
-		//nothing more todo here
-		break;
-	case DIR_CW:
-		displayDebugMsg("->");
-		break;
-	case DIR_CCW:
-		displayDebugMsg("<-");
-		break;
-	default:
-		break;
 	}
 
 	//navigate menu if no Menu item currently selected
@@ -60,26 +52,24 @@ void onRotaryEncoderTurnEvent() {
 		case NullItem:
 			break;
 		case FreqSet:
+			changeFrequency(dir);
+			drawMainScreenFrequency(true);
+			sigGen.setFreq(frequency);
 			break;
 		case Mode:
-			if (dir == DIR_CW) {
-				if (selectedWaveform < 2) {
-					selectedWaveform++;
-					drawMainScreenWaveform(true);
-				}
+			if (dir == DIR_CW && selectedWaveform < 2) {
+				selectedWaveform++;
+				drawMainScreenWaveform(true);
+				sigGen.mode(selectedWaveform);
+			} else if (dir == DIR_CCW && selectedWaveform > 0) {
+				selectedWaveform--;
+				drawMainScreenWaveform(true);
+				sigGen.mode(selectedWaveform);
 			}
-			else if (dir == DIR_CCW) {
-				if (selectedWaveform > 0) {
-					selectedWaveform--;
-					drawMainScreenWaveform(true);
-				}
-			}			
 			break;
 		case Power:
 			break;
-		case PhasePreset:
-			break;
-		case FreqPreset:
+		case Phase:
 			break;
 		case Settings:
 			break;
@@ -89,6 +79,26 @@ void onRotaryEncoderTurnEvent() {
 			break;
 		}
 	}
+}
+
+void changeFrequency(rotaryEncoderDir dir) {
+	uint32_t step;
+
+	if (frequency > 1000000) { //MHz
+		step = (isAccelerated) ? 100000 : 10000;
+		if (dir == DIR_CCW && frequency - step < 1000000)
+			step = abs(frequency - 1000000);
+	} else if (frequency > 1000) { //kHz
+		step = (isAccelerated) ? 1000 : 10;
+		if (dir == DIR_CCW && frequency - step < 1000)
+			step = abs(frequency - 1000);
+	} else {
+		step = (isAccelerated) ? 10 : 1;
+		if (dir == DIR_CCW && frequency <= step)
+			step = abs(frequency - 1);
+	}
+	frequency += (dir == DIR_CW) ? step : step*-1;
+
 }
 
 void callButtonEvent(ClickEncoder::Button button);
@@ -120,8 +130,6 @@ void setup() {
 
   encoder.setAccelerationEnabled(true);  
 
-  // Set Cursor to initial possition
-  //lcd.setCursor(0, 0);
 }
 
 //Interrupt Service Routine 
@@ -145,9 +153,7 @@ void loop() {
 	  break;
   case Power:
 	  break;
-  case FreqPreset:
-	  break;
-  case PhasePreset:
+  case Phase:
 	  break;
   }
 
@@ -338,6 +344,8 @@ void onButtonHold() {
 
 void togglePowerState() {
 	currentPowerState ^= true;
+	// Turn DAC and clock ON/OFF
+	(currentPowerState) ? sigGen.sleep(3) : sigGen.sleep(0);
 }
 
 void onClick() {
@@ -346,10 +354,35 @@ void onClick() {
 		menuActive = menuSelected;
 		drawMenuBar();
 		drawMainScreen();
-	} else if (menuSelected != NullItem && menuSelected == menuActive) {
-		menuActive = NullItem;
-		drawMenuBar();
+	} else if (menuSelected == menuActive) {
+
 		//drawMainScreen();
+		switch (menuSelected) {
+		case NullItem:
+			break;
+		case FreqSet:
+
+			break;
+		default:
+			menuActive = NullItem;
+			drawMenuBar();
+			break;
+		//case Mode:
+		//	break;
+		//case Power:
+		//	break;
+		//case Phase:
+		//	break;
+		//case Sweep:
+		//	break;
+		//case Settings:
+		//	break;
+		//case Help:
+		//	break;
+		//case lastItem:
+		//	break;
+		}
+
 	}
 
 }
@@ -581,15 +614,14 @@ void drawMainScreen() {
 		drawMainScreenFrequency();
 		break;
 	case FreqSet:
+		drawMainScreenFrequency();
 		break;
 	case Mode:
 		drawMainScreenWaveform();
 		break;
 	case Power:
 		break;
-	case PhasePreset:
-		break;
-	case FreqPreset:
+	case Phase:
 		break;
 	case Settings:
 		break;
@@ -622,31 +654,44 @@ void drawMainScreenWaveform(bool drawPartial) {
 
 }
 
-void drawMainScreenFrequency() {
+void drawMainScreenFrequency(bool drawPartial) {
+	
 	tft.setTextColor(BLACK);
-	tft.setCursor(4, 50);
-	tft.setTextSize(1);
-	tft.print(F("Frequency"));
-	String unit = F(" Hz");
-	float f = frequency;
+	if (!drawPartial) {
+		tft.setCursor(4, 50);
+		tft.setTextSize(1);
+		tft.print(F("Frequency"));
+	}
+	//convert frequency into kHz/MHz
+	uint32_t frequencyConverted;
+	uint32_t frequenyConvertedDecimals;
+	String unit;
 	char buffer[50];
-	if (frequency >= 1e+9) {
-		f = frequency / 1e+9F;
-		unit = F("GHz");
-	}
-	else if (frequency >= 1e+6) {
-		f = frequency / 1e+6F;
+	if (frequency >= 1000000) {
+		frequencyConverted = frequency / 1000000;
+		frequenyConvertedDecimals = frequency % 1000000 / 10000;
 		unit = F("MHz");
-	}
-	else if (frequency >= 1e+3) {
-		f = frequency / 1e+3F;
+	} else if (frequency >= 1000) {
+		frequencyConverted = frequency / 1000;
+		frequenyConvertedDecimals = frequency % 1000 /10;
 		unit = F("kHz");
+	} else {
+		unit = F("Hz");
+		frequencyConverted = frequency;
+		frequenyConvertedDecimals = 0;
 	}
-
-	sprintf(buffer, "%d,%02d ", (int)f, (int)(f * 100) % 100);
-	printAlignCenter((String) buffer, 4, tft.width()/2, 75);
+	displayDebugMsg((String)frequenyConvertedDecimals);
+	tft.fillRect(0, 65, tft.width(), 30, PALEVIOLET);
+	String output = (String)frequencyConverted;
+	if (frequency >= 1000) {
+		output += ",";
+		output += (frequenyConvertedDecimals < 10) ? "0" : "";
+		output += (String)frequenyConvertedDecimals;
+	}
+	printAlignCenter(output, 4, tft.width() / 2, 75);
 	tft.setTextSize(3);
 	tft.setCursor(100, 110);
+	tft.fillRect(100, 95, 100, 20, PALEVIOLET);
 	tft.print(unit);
 }
 
@@ -692,7 +737,7 @@ void drawMenuBar() {
 	//	break;
 	//case Power:
 	//	break;
-	//case PhasePreset:
+	//case Phase:
 	//	break;
 	//case FreqPreset:
 	//	break;

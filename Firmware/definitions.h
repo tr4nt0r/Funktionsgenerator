@@ -12,6 +12,7 @@ const uint8_t rotaryEncoderPinA = 3;
 const uint8_t rotaryEncoderPinB = 2;
 int16_t rotaryEncoderLastPos = 0;
 int16_t rotaryEncoderPos = 0;
+bool isAccelerated = false;
 
 enum rotaryEncoderDir {
 	DIR_NONE,
@@ -24,8 +25,8 @@ enum Menu {
 	FreqSet,
 	Mode,
 	Power,
-	PhasePreset,
-	FreqPreset,		
+	Phase,
+	Sweep,
 	Settings,
 	Help,
 	lastItem
@@ -36,8 +37,8 @@ const PROGMEM String MenuLabel[] = {
 	"FREQUENCY",
 	"WAVEFORM",
 	"OUTPUT",
-	"PHASE",	
-	"PRESETS",
+	"PHASE",
+	"SWEEP",
 	"SETTINGS",
 	"HELP"
 };
@@ -58,7 +59,7 @@ Menu menuSelected = NullItem; //highligted menu item selected with rotary encode
 Menu menuActive = NullItem; //currently active menu item
 bool buttonIsHeld = false;  //check if button is still held or is a new hold event after a release event
 int digitPos = 0;
-const unsigned long maxFrequency = 14000000;
+const unsigned long maxFrequency = 12000000;
 const unsigned int maxPhase = 4095; // Only used if you enable PHASE setting instead of FREQ register
 unsigned long newFrequency = 1000;
 volatile bool updateDisplay = true;
@@ -71,8 +72,9 @@ const PROGMEM String waveformLabel[] = { "SINE", "TRINGLE", "SQUARE" };
 uint8_t selectedWaveform = 0;
 unsigned long frequency0 = 1000;
 unsigned long frequency1 = 1000;
-unsigned long frequency = frequency0;
+uint32_t frequency = frequency0;
 unsigned long currFrequency; // Current frequency used, either 0 or 1
+uint32_t FreqIncrementStep =  1;
 unsigned long phase = 0; // Only used if you enable PHASE setting instead of FREQ register
 bool currentPowerState = false;
 // Greek PHI symbol for phase shift
