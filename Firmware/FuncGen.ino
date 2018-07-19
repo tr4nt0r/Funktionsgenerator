@@ -46,15 +46,15 @@ void onRotaryEncoderTurnEvent() {
 		}
 	}
 	//rotary encoder actions if a menu item is active
-	else if (dir != DIR_NONE && menuActive != NullItem) {
-		switch (menuSelected)
+	else if (dir != DIR_NONE && menuSelected == menuActive) {
+		switch (menuActive)
 		{
 		case NullItem:
-			break;
-		case FreqSet:
 			changeFrequency(dir);
 			drawMainScreenFrequency(true);
 			sigGen.setFreq(frequency);
+			break;
+		case FreqSet:
 			break;
 		case Mode:
 			if (dir == DIR_CW && selectedWaveform < 2) {
@@ -353,20 +353,30 @@ void onClick() {
 
 	if (menuSelected != NullItem && menuSelected != menuActive) {
 		menuActive = menuSelected;
+		if (menuActive == FreqSet) {
+			newFrequency = frequency;
+		}
 		drawMenuBar();
 		drawMainScreen();
 	} else if (menuSelected == menuActive) {
 
 		//drawMainScreen();
-		switch (menuSelected) {
+		switch (menuActive) {
 		case NullItem:
 			break;
 		case FreqSet:
-
-			break;
-		default:
-			menuActive = NullItem;
-			drawMenuBar();
+			//with each click cursor switches to next digit
+			numDigits = (newFrequency < 1000) ? 3 : 5;
+			if (digitPos < numDigits) {
+				digitPos++;				
+			} else {
+				digitPos = 0;
+				frequency = newFrequency;
+				menuActive = NullItem;
+				drawMenuBar();
+				drawMainScreenFrequency();
+				sigGen.setFreq(frequency);
+			}
 			break;
 		//case Mode:
 		//	break;
@@ -382,6 +392,10 @@ void onClick() {
 		//	break;
 		//case lastItem:
 		//	break;
+		default:
+			menuActive = NullItem;
+			drawMenuBar();
+			break;
 		}
 
 	}
@@ -595,8 +609,7 @@ void displayChange() {
 
 void displayDebugMsg(String msg) {
 #ifdef DEBUG
-	tft.setTextSize(1);
-	tft.setTextColor(GREEN);
+	tft.setTextSize(1);	
 	tft.setCursor(4, 125);
 	int16_t x1, y1;
 	uint16_t w, h;
@@ -656,38 +669,46 @@ void drawMainScreenWaveform(bool drawPartial) {
 }
 
 void drawMainScreenFrequency(bool drawPartial) {
-	
+	uint32_t frequencyShow = (menuActive == FreqSet) ? newFrequency : frequency;
+	uint8_t exp = 0;
+	uint8_t dec = 0;
+	String unit;
+	bool isTrailZero = (menuActive == FreqSet) ? false : true;
+
 	tft.setTextColor(BLACK);
 	if (!drawPartial) {
 		tft.setCursor(4, 50);
 		tft.setTextSize(1);
 		tft.print(F("Frequency"));
 	}
-	//convert frequency into kHz/MHz
-	uint32_t frequencyConverted;
-	uint32_t frequenyConvertedDecimals;
-	String unit;
-	char buffer[50];
-	if (frequency >= 1000000) {
-		frequencyConverted = frequency / 1000000;
-		frequenyConvertedDecimals = frequency % 1000000 / 10000;
+
+	if (frequencyShow >= 1000000) {
 		unit = F("MHz");
-	} else if (frequency >= 1000) {
-		frequencyConverted = frequency / 1000;
-		frequenyConvertedDecimals = frequency % 1000 /10;
+		exp = 6;
+		numDigits = 5;  //show 5 digits, 2 digits as decimal
+		dec = 2;
+	} else if (frequencyShow >= 1000) {
 		unit = F("kHz");
+		exp = 3;
+		numDigits = 5;
+		dec = 2;
 	} else {
 		unit = F("Hz");
-		frequencyConverted = frequency;
-		frequenyConvertedDecimals = 0;
-	}	
-	tft.fillRect(0, 65, tft.width(), 30, PALEVIOLET);
-	String output = (String)frequencyConverted;
-	if (frequency >= 1000) {
-		output += ",";
-		output += (frequenyConvertedDecimals < 10) ? "0" : "";
-		output += (String)frequenyConvertedDecimals;
+		numDigits = 3;	
 	}
+	tft.fillRect(0, 65, tft.width(), 30, PALEVIOLET);
+	String output;
+
+	for (uint8_t i = numDigits; i > 0; i--) {
+		uint32_t r = frequencyShow / pow(10, (i-1) + exp - dec) % 10;
+		if (!isTrailZero || r != 0) { //suppress trailing zeros
+			if (i == dec)
+				output += ",";
+			output += (String) r;
+			isTrailZero = false;
+		}
+	}
+
 	printAlignCenter(output, 4, tft.width() / 2, 75);
 	tft.setTextSize(3);
 	tft.setCursor(100, 110);

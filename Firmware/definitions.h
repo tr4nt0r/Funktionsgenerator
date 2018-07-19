@@ -58,7 +58,8 @@ unsigned char cursorPos = 0;
 Menu menuSelected = NullItem; //highligted menu item selected with rotary encoder
 Menu menuActive = NullItem; //currently active menu item
 bool buttonIsHeld = false;  //check if button is still held or is a new hold event after a release event
-int digitPos = 0;
+uint8_t digitPos = 0;
+uint8_t numDigits;
 const unsigned long maxFrequency = 12000000;
 const unsigned int maxPhase = 4095; // Only used if you enable PHASE setting instead of FREQ register
 unsigned long newFrequency = 1000;
