@@ -55,6 +55,7 @@ void onRotaryEncoderTurnEvent() {
 			sigGen.setFreq(frequency);
 			break;
 		case FreqSet:
+			//changeFrequencyDigit(dir, digitPos);
 			break;
 		case Mode:
 			if (dir == DIR_CW && selectedWaveform < 2) {
@@ -81,6 +82,31 @@ void onRotaryEncoderTurnEvent() {
 	}
 }
 
+void changeFrequencyDigit(rotaryEncoderDir dir, uint8_t digitPos) {
+	uint8_t exp = 0, dec = 0;
+	int8_t rnew;
+
+	if (newFrequency >= 1000000) {
+		exp = 6; dec = 2;
+	} else if (newFrequency >= 1000) {
+		exp = 3; dec = 2;
+	}
+
+	uint32_t r = newFrequency / pow(10, numDigits - digitPos - 1 + exp - dec) % 10;
+
+	if (dir == DIR_CW)
+		rnew = (r == 9) ? 0 : r + 1;
+	else
+		rnew = (r == 0) ? 9 : r - 1;
+
+	//calculate diff and add to frequency
+	displayDebugMsg((String)((int8_t)(rnew - r)));
+
+	newFrequency += (int8_t)(rnew - r) * pow(10, numDigits - digitPos - 1 + exp - dec);
+	drawMainScreenFrequency(true);
+
+}
+
 void changeFrequency(rotaryEncoderDir dir) {
 	uint32_t step;
 
@@ -93,7 +119,7 @@ void changeFrequency(rotaryEncoderDir dir) {
 		if (dir == DIR_CCW && frequency - step < 1000)
 			step = abs(frequency - 1000);
 	} else {
-		step = (isAccelerated) ? 10 : 1;
+		step = (isAccelerated) ? 100 : 1;
 		if (dir == DIR_CCW && frequency <= step)
 			step = abs(frequency - 1);
 	}
@@ -111,8 +137,7 @@ void setup() {
 	displayBootUpMsg(); //display Bootscreen for 2s
 	drawMenuBar();
 	drawMainScreen(); //renders Mainscreen Boxes
-	updateDisplay = true;
-	displayChange();  //write values on MainScreen
+
 
   // Initialise the AD9833 with 1KHz sine output, no phase shift for both
   // registers and remain on the FREQ0 register
@@ -353,9 +378,6 @@ void onClick() {
 
 	if (menuSelected != NullItem && menuSelected != menuActive) {
 		menuActive = menuSelected;
-		if (menuActive == FreqSet) {
-			newFrequency = frequency;
-		}
 		drawMenuBar();
 		drawMainScreen();
 	} else if (menuSelected == menuActive) {
@@ -368,7 +390,8 @@ void onClick() {
 			//with each click cursor switches to next digit
 			numDigits = (newFrequency < 1000) ? 3 : 5;
 			if (digitPos < numDigits) {
-				digitPos++;				
+				digitPos++;
+				drawMainScreenFrequency(true);
 			} else {
 				digitPos = 0;
 				frequency = newFrequency;
@@ -409,125 +432,127 @@ void onButtonUp() {
 	}
 };
 
+//
+//void encChange() {
+//  // Depending in which menu state you are
+//  // the encoder will either change the value of a setting:
+//  //-+ frequency, change between FREQ0 and FREQ1 register (or -+ phase), On/Off, mode
+//  // or it will change the cursor position
+//
+//
+//	rotaryEncoderDir dir = DIR_NONE;
+//  // Direction clockwise
+//  if (dir == DIR_CW) {
+//    switch (menuSelected) {
+//      case 1: {
+//          if (cursorPos == 3)
+//            cursorPos = 0;
+//          else
+//            cursorPos++;
+//        } break;
+//
+//      case 2: {
+//          // Here we initialise two variables.
+//          // newFrequency is the value of the frequency after we increment it
+//          // dispDigit is the digit that we are currently modifing, and we obtain it
+//          // by a neat little trick, using operator % in conjunction with division
+//          // We then compare these variables with the maximum value for our
+//          // frequency, if all is good, make the change
+//          unsigned long newFrequency = frequency + pow(10, digitPos);
+//          unsigned char dispDigit =
+//            frequency % (unsigned long) pow(10, digitPos + 1) / pow(10, digitPos);
+//          if (newFrequency <= maxFrequency && dispDigit < 9) {
+//            frequency += pow(10, digitPos);
+//            updateDisplay = true;
+//          }
+//
+//          if (freqRegister == 0) {
+//            frequency0 = frequency;
+//          } else if (freqRegister == 1) {
+//            frequency1 = frequency;
+//          }
+//
+//        } break;
+//
+//      case 4: {
+//          // if usePhase has been defined, changes in the encoder will vary the phase
+//          // value (upto 4096)
+//          // A better implementation would be to use increment of pi/4 or submultiples of
+//          // pi where 2pi = 4096
+//#ifdef usePhase
+//          unsigned long newPhase = phase + pow(10, digitPos);
+//          unsigned char dispDigit =
+//            phase % pow(10, digitPos + 1) / pow(10, digitPos);
+//          if (newPhase < maxPhase && dispDigit < 9) {
+//            phase += pow(10, digitPos);
+//            updateDisplay = true;
+//          }
+//#endif
+//        } break;
+//
+//      case 5: {
+//          if (selectedWaveform == 2)
+//            selectedWaveform = 0;
+//          else
+//            selectedWaveform++;
+//          updateDisplay = true;
+//        } break;
+//    }
+//  }
+//  // Direction counter clockwise
+//  else if (dir == DIR_CCW) {
+//    switch (menuSelected) {
+//      case 1: {
+//          if (cursorPos == 0)
+//            cursorPos = 3;
+//          else
+//            cursorPos--;
+//        } break;
+//
+//      case 2: {
+//          unsigned long newFrequency = frequency + pow(10, digitPos);
+//          unsigned char dispDigit = frequency % (unsigned long) pow(10, digitPos + 1) / pow(10, digitPos);
+//
+//          if (newFrequency > 0 && dispDigit > 0) {
+//            frequency -= pow(10, digitPos);
+//            updateDisplay = true;
+//          }
+//
+//          if (freqRegister == 0) {
+//            frequency0 = frequency;
+//          } else if (freqRegister == 1) {
+//            frequency1 = frequency;
+//          }
+//        } break;
+//
+//      case 4: {
+//          // if usePhase has been defined, changes in the encoder will vary the phase
+//          // value (upto 4096)
+//          // A better implementation would be to use increment of pi/4 or submultiples of
+//          // pi where 2pi = 4096
+//#ifdef usePhase
+//          unsigned long newPhase = phase + pow(10, digitPos);
+//          unsigned char dispDigit =
+//            phase % pow(10, digitPos + 1) / pow(10, digitPos);
+//          if (newPhase > 0 && dispDigit > 0) {
+//            phase -= pow(10, digitPos);
+//            updateDisplay = true;
+//          }
+//#endif
+//        } break;
+//
+//      case 5: {
+//          if (selectedWaveform == 0)
+//            selectedWaveform = 2;
+//          else
+//            selectedWaveform--;
+//          updateDisplay = true;
+//        } break;
+//    }
+//  }
+//}
 
-void encChange() {
-  // Depending in which menu state you are
-  // the encoder will either change the value of a setting:
-  //-+ frequency, change between FREQ0 and FREQ1 register (or -+ phase), On/Off, mode
-  // or it will change the cursor position
 
-
-	rotaryEncoderDir dir = DIR_NONE;
-  // Direction clockwise
-  if (dir == DIR_CW) {
-    switch (menuSelected) {
-      case 1: {
-          if (cursorPos == 3)
-            cursorPos = 0;
-          else
-            cursorPos++;
-        } break;
-
-      case 2: {
-          // Here we initialise two variables.
-          // newFrequency is the value of the frequency after we increment it
-          // dispDigit is the digit that we are currently modifing, and we obtain it
-          // by a neat little trick, using operator % in conjunction with division
-          // We then compare these variables with the maximum value for our
-          // frequency, if all is good, make the change
-          unsigned long newFrequency = frequency + pow(10, digitPos);
-          unsigned char dispDigit =
-            frequency % (unsigned long) pow(10, digitPos + 1) / pow(10, digitPos);
-          if (newFrequency <= maxFrequency && dispDigit < 9) {
-            frequency += pow(10, digitPos);
-            updateDisplay = true;
-          }
-
-          if (freqRegister == 0) {
-            frequency0 = frequency;
-          } else if (freqRegister == 1) {
-            frequency1 = frequency;
-          }
-
-        } break;
-
-      case 4: {
-          // if usePhase has been defined, changes in the encoder will vary the phase
-          // value (upto 4096)
-          // A better implementation would be to use increment of pi/4 or submultiples of
-          // pi where 2pi = 4096
-#ifdef usePhase
-          unsigned long newPhase = phase + pow(10, digitPos);
-          unsigned char dispDigit =
-            phase % pow(10, digitPos + 1) / pow(10, digitPos);
-          if (newPhase < maxPhase && dispDigit < 9) {
-            phase += pow(10, digitPos);
-            updateDisplay = true;
-          }
-#endif
-        } break;
-
-      case 5: {
-          if (selectedWaveform == 2)
-            selectedWaveform = 0;
-          else
-            selectedWaveform++;
-          updateDisplay = true;
-        } break;
-    }
-  }
-  // Direction counter clockwise
-  else if (dir == DIR_CCW) {
-    switch (menuSelected) {
-      case 1: {
-          if (cursorPos == 0)
-            cursorPos = 3;
-          else
-            cursorPos--;
-        } break;
-
-      case 2: {
-          unsigned long newFrequency = frequency + pow(10, digitPos);
-          unsigned char dispDigit = frequency % (unsigned long) pow(10, digitPos + 1) / pow(10, digitPos);
-
-          if (newFrequency > 0 && dispDigit > 0) {
-            frequency -= pow(10, digitPos);
-            updateDisplay = true;
-          }
-
-          if (freqRegister == 0) {
-            frequency0 = frequency;
-          } else if (freqRegister == 1) {
-            frequency1 = frequency;
-          }
-        } break;
-
-      case 4: {
-          // if usePhase has been defined, changes in the encoder will vary the phase
-          // value (upto 4096)
-          // A better implementation would be to use increment of pi/4 or submultiples of
-          // pi where 2pi = 4096
-#ifdef usePhase
-          unsigned long newPhase = phase + pow(10, digitPos);
-          unsigned char dispDigit =
-            phase % pow(10, digitPos + 1) / pow(10, digitPos);
-          if (newPhase > 0 && dispDigit > 0) {
-            phase -= pow(10, digitPos);
-            updateDisplay = true;
-          }
-#endif
-        } break;
-
-      case 5: {
-          if (selectedWaveform == 0)
-            selectedWaveform = 2;
-          else
-            selectedWaveform--;
-          updateDisplay = true;
-        } break;
-    }
-  }
-}
 // Function to display the current frequency in the top left corner
 void displayFrequency() {
   unsigned long frequencyToDisplay = frequency;
@@ -554,58 +579,58 @@ void displayFrequency() {
  
 }
 // Function to display power state (ON/OFF) in the top right corner
-void displayPower() {
-	tft.setCursor(4, 30);
-	tft.setTextColor(GREEN);
-	tft.setTextSize(1);
-	//tft.print(powerState[currentPowerState]);
-}
-// Function to display the mode in the bottom right corner
-void displayMode() {
-	tft.setTextColor(GREEN);
-	tft.setTextSize(1);
-	tft.setCursor(4, 60);
-	tft.print(waveformLabel[selectedWaveform]);
-}
+//void displayPower() {
+//	tft.setCursor(4, 30);
+//	tft.setTextColor(GREEN);
+//	tft.setTextSize(1);
+//	//tft.print(powerState[currentPowerState]);
+//}
+//// Function to display the mode in the bottom right corner
+//void displayMode() {
+//	tft.setTextColor(GREEN);
+//	tft.setTextSize(1);
+//	tft.setCursor(4, 60);
+//	tft.print(waveformLabel[selectedWaveform]);
+//}
 // Function to display the mode in the bottom left corner
 // Only used if you enable PHASE setting instead of FREQ register
-void displayPhase() {
-  unsigned int phaseToDisplay = phase;
-  //lcd.setCursor(0, 1);
-  //lcd.write(0);
-  //lcd.print("=");
-  for (int i = 3; i >= 0; i--) {
-    unsigned int dispDigit = phaseToDisplay / pow(10, i);
-    //lcd.print(dispDigit);
-    phaseToDisplay -= dispDigit * pow(10, i);
-  }
-}
+//void displayPhase() {
+//  unsigned int phaseToDisplay = phase;
+//  //lcd.setCursor(0, 1);
+//  //lcd.write(0);
+//  //lcd.print("=");
+//  for (int i = 3; i >= 0; i--) {
+//    unsigned int dispDigit = phaseToDisplay / pow(10, i);
+//    //lcd.print(dispDigit);
+//    phaseToDisplay -= dispDigit * pow(10, i);
+//  }
+//}
 // Function to display the FREQ register (either 0 or 1) in the bottom left
 // corner
-void displayFreqRegister() {
-	tft.setCursor(4, 90);
-	tft.setTextSize(1);
-	tft.setTextColor(GREEN);	
-	tft.print("Preset ");
-	tft.print(freqRegister);
-}
+//void displayFreqRegister() {
+//	tft.setCursor(4, 90);
+//	tft.setTextSize(1);
+//	tft.setTextColor(GREEN);	
+//	tft.print("Preset ");
+//	tft.print(freqRegister);
+//}
 
-void displayChange() {
-	return;
-	// Update display if needed
-	if (updateDisplay == true) {
-		displayFrequency();
-#ifdef usePhase
-		displayPhase();
-#endif
-		displayPower();
-#ifndef usePhase
-		displayFreqRegister();
-#endif
-		displayMode();
-		updateDisplay = false;
-	}
-}
+//void displayChange() {
+//	return;
+//	// Update display if needed
+//	if (updateDisplay == true) {
+//		displayFrequency();
+//#ifdef usePhase
+//		displayPhase();
+//#endif
+//		displayPower();
+//#ifndef usePhase
+//		displayFreqRegister();
+//#endif
+//		displayMode();
+//		updateDisplay = false;
+//	}
+//}
 
 void displayDebugMsg(String msg) {
 #ifdef DEBUG
@@ -628,7 +653,7 @@ void drawMainScreen() {
 		drawMainScreenFrequency();
 		break;
 	case FreqSet:
-		drawMainScreenFrequency();
+		//drawMainScreenFrequency();
 		break;
 	case Mode:
 		drawMainScreenWaveform();
@@ -669,11 +694,9 @@ void drawMainScreenWaveform(bool drawPartial) {
 }
 
 void drawMainScreenFrequency(bool drawPartial) {
-	uint32_t frequencyShow = (menuActive == FreqSet) ? newFrequency : frequency;
-	uint8_t exp = 0;
-	uint8_t dec = 0;
-	String unit;
-	bool isTrailZero = (menuActive == FreqSet) ? false : true;
+	uint8_t exp = 0, dec = 0;	
+	String PROGMEM unit;
+	bool isTrailZero = true;
 
 	tft.setTextColor(BLACK);
 	if (!drawPartial) {
@@ -682,12 +705,12 @@ void drawMainScreenFrequency(bool drawPartial) {
 		tft.print(F("Frequency"));
 	}
 
-	if (frequencyShow >= 1000000) {
+	if (frequency >= 1000000) {
 		unit = F("MHz");
 		exp = 6;
 		numDigits = 5;  //show 5 digits, 2 digits as decimal
 		dec = 2;
-	} else if (frequencyShow >= 1000) {
+	} else if (frequency >= 1000) {
 		unit = F("kHz");
 		exp = 3;
 		numDigits = 5;
@@ -700,20 +723,29 @@ void drawMainScreenFrequency(bool drawPartial) {
 	String output;
 
 	for (uint8_t i = numDigits; i > 0; i--) {
-		uint32_t r = frequencyShow / pow(10, (i-1) + exp - dec) % 10;
+		uint32_t r = frequency / pow(10, (i - 1) + exp - dec) % 10;
 		if (!isTrailZero || r != 0) { //suppress trailing zeros
 			if (i == dec)
-				output += ",";
-			output += (String) r;
+				output += F(",");
+			output += (String)r;
 			isTrailZero = false;
 		}
 	}
-
 	printAlignCenter(output, 4, tft.width() / 2, 75);
 	tft.setTextSize(3);
 	tft.setCursor(100, 110);
 	tft.fillRect(100, 95, 100, 20, PALEVIOLET);
 	tft.print(unit);
+}
+
+void drawMainScreenFreqSet() {
+
+	tft.fillRect(0, 65, tft.width(), 30, PALEVIOLET);
+
+
+
+
+
 }
 
 void drawMenuBar() {
