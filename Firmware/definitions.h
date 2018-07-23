@@ -20,18 +20,20 @@ enum rotaryEncoderDir {
 	DIR_CCW,
 };
 
-enum Menu {
-	NullItem,
-	FreqSet,
-	Mode,
-	Power,
-	Phase,
-	Sweep,
-	Settings,
-	Help,
-	lastItem
+class Menu {
+public:
+	enum Menu_e {
+		NullItem,
+		FreqSet,
+		Mode,
+		Power,
+		Phase,
+		Sweep,
+		Settings,
+		Help,
+		lastItem
+	};
 };
-
 const PROGMEM String MenuLabel[] = {
 	"",
 	"FREQUENCY",
@@ -55,14 +57,15 @@ unsigned char settingsPos[] = { 0, 14, 20, 29 };
 unsigned char button;
 unsigned char lastCursorPos = 0;
 unsigned char cursorPos = 0;
-Menu menuSelected = NullItem; //highligted menu item selected with rotary encoder
-Menu menuActive = NullItem; //currently active menu item
+Menu::Menu_e menuSelected = Menu::NullItem; //highligted menu item selected with rotary encoder
+Menu::Menu_e menuActive = Menu::NullItem; //currently active menu item
 bool buttonIsHeld = false;  //check if button is still held or is a new hold event after a release event
 uint8_t digitPos = 0;
 uint8_t numDigits;
 const unsigned long maxFrequency = 12000000;
 const unsigned int maxPhase = 4095; // Only used if you enable PHASE setting instead of FREQ register
-unsigned long newFrequency = 1000;
+uint32_t newFrequency[4];
+uint8_t newFrequencyExp = 0;
 volatile bool updateDisplay = true;
 
 int freqRegister = 0; // Default FREQ register is 0
