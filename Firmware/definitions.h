@@ -64,7 +64,7 @@ uint8_t digitPos = 0;
 uint8_t numDigits;
 const unsigned long maxFrequency = 12000000;
 const unsigned int maxPhase = 4095; // Only used if you enable PHASE setting instead of FREQ register
-uint32_t newFrequency[4];
+uint32_t newFrequency[5];
 uint8_t newFrequencyExp = 0;
 volatile bool updateDisplay = true;
 

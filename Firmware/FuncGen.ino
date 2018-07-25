@@ -86,21 +86,19 @@ void onRotaryEncoderTurnEvent() {
 void changeFrequencyDigit(rotaryEncoderDir dir, uint8_t digitPos) {
 	int8_t rnew;
 
+	if (digitPos == numDigits) {
+		if (dir == DIR_CW)
+			newFrequencyExp = (newFrequencyExp == 6) ? 6 : newFrequencyExp + 3;
+		else
+			newFrequencyExp = (newFrequencyExp == 0) ? 0 : newFrequencyExp - 3;
+	} else {
+		if (dir == DIR_CW)
+			newFrequency[digitPos] = (newFrequency[digitPos] == 9) ? 0 : newFrequency[digitPos] + 1;
+		else
+			newFrequency[digitPos] = (newFrequency[digitPos] == 0) ? 9 : newFrequency[digitPos] - 1;
+	}	
 
-
-
-	//uint32_t r = newFrequency / pow(10, numDigits - 1 - digitPos + exp - dec) % 10;
-	
-	if (dir == DIR_CW)
-		newFrequency[digitPos] = (newFrequency[digitPos] == 9) ? 0 : newFrequency[digitPos] + 1;
-	else
-		newFrequency[digitPos] = (newFrequency[digitPos] == 0) ? 9 : newFrequency[digitPos] - 1;
-
-	//calculate diff and add to frequency
-
-	
 	drawMainScreenFreqSet();
-
 }
 
 void changeFrequency(rotaryEncoderDir dir) {
@@ -110,6 +108,8 @@ void changeFrequency(rotaryEncoderDir dir) {
 		step = (isAccelerated) ? 100000 : 10000;
 		if (dir == DIR_CCW && frequency - step < 1000000)
 			step = abs(frequency - 1000000);
+		if (dir == DIR_CW && frequency + step > maxFrequency)
+			step = maxFrequency - frequency;
 	} else if (frequency > 1000) { //kHz
 		step = (isAccelerated) ? 1000 : 10;
 		if (dir == DIR_CCW && frequency - step < 1000)
@@ -119,9 +119,7 @@ void changeFrequency(rotaryEncoderDir dir) {
 		if (dir == DIR_CCW && frequency <= step)
 			step = abs(frequency - 1);
 	}
-	displayDebugMsg(step);
 	frequency += (dir == DIR_CW) ? step : step*-1;
-
 }
 
 void callButtonEvent(ClickEncoder::Button button);
@@ -372,33 +370,23 @@ void onClick() {
 			break;
 		case Menu::FreqSet:
 
-			//with each click cursor switches to next digit
-			numDigits = 5;
+			//with each click cursor switches to next digit			
 
-			//when entering FreqSet Menu initialize digits with actual frequency
-			if (digitPos == 0) {
-				newFrequencyExp = 0;
-				if (frequency >= 1000000)
-					newFrequencyExp = 6;
-				else if (frequency >= 1000)
-					newFrequencyExp = 3;			
-				String debug_str;
-				for (uint8_t i = 0; i < numDigits; i++) {
-					newFrequency[i] = frequency / pow(10, numDigits -1 - i + newFrequencyExp - 2) % 10;
-					debug_str += (String) newFrequency[i];
-				}
-				displayDebugMsg(debug_str);
-			}
-
-			if (digitPos < numDigits) {				
-				drawMainScreenFreqSet();
+			if (digitPos < numDigits) {
 				digitPos++;
+				drawMainScreenFreqSet();
+
 			} else {
 				digitPos = 0;
-				//frequency = newFrequency;
+
+				for (uint8_t i = 0; i < numDigits; i++) {
+
+				}
+
+				frequency = getFrequencyFromDigits();
 				menuActive = Menu::NullItem;
 				drawMenuBar();
-				drawMainScreen();
+				drawMainScreenFrequency();
 				sigGen.setFreq(frequency);
 			}
 
@@ -427,6 +415,19 @@ void onClick() {
 
 }
 
+uint32_t getFrequencyFromDigits() {
+	uint32_t f = 0;
+
+	for (uint8_t i = 0; i < numDigits; i++) {
+		if (newFrequencyExp != 0 || i <= 2)
+			f += newFrequency[i] * pow(10, newFrequencyExp - 2 + numDigits - i - 1);		
+	}
+	if (f > maxFrequency)
+		return maxFrequency;
+	if (f == 0)
+		return 1;
+	return f;
+}
 void onButtonUp() {
 	//reset button hold status
 	if (buttonIsHeld == true) {
@@ -634,7 +635,7 @@ void displayFrequency() {
 //	}
 //}
 
-void displayDebugMsg(int msg) { displayDebugMsg((String)msg); }
+void displayDebugMsg(uint32_t msg) { displayDebugMsg((String)msg); }
 void displayDebugMsg(String msg) {
 #ifdef DEBUG
 	tft.setTextSize(1);	
@@ -655,6 +656,24 @@ void drawMainScreen() {
 			drawMainScreenFrequency();
 		break;
 	case Menu::FreqSet:
+		//when entering FreqSet Menu initialize digits with actual frequency
+		if (digitPos == 0) {
+			numDigits = 5;
+			newFrequencyExp = 0;
+			if (frequency >= 1000000)
+				newFrequencyExp = 6;
+			else if (frequency >= 1000)
+				newFrequencyExp = 3;
+
+			for (uint8_t i = 0; i < numDigits; i++) {
+				if (newFrequencyExp == 0 && i > 2)
+					newFrequency[i] = 0;
+				else {
+					newFrequency[i] = frequency / pow(10, numDigits - 1 - i + newFrequencyExp - 2) % 10;
+				}
+			}
+		}
+
 		drawMainScreenFreqSet();
 		break;
 	case Menu::Mode:
@@ -702,6 +721,7 @@ void drawMainScreenFrequency(bool drawPartial) {
 
 	tft.setTextColor(BLACK);
 	if (!drawPartial) {
+		tft.fillRect(0, 45, tft.width(), 10, PALEVIOLET);
 		tft.setCursor(4, 50);
 		tft.setTextSize(1);
 		tft.print(F("Frequency"));
@@ -741,8 +761,11 @@ void drawMainScreenFrequency(bool drawPartial) {
 }
 
 void drawMainScreenFreqSet() {
-	uint8_t exp = 0, dec = 2;
+	uint8_t dec = 2;
 	String unit = F("Hz");
+
+	numDigits = 5;
+
 
 	tft.setTextColor(BLACK);
 	tft.setCursor(4, 50);
@@ -883,8 +906,8 @@ void printAlignCenter(const String text, uint8_t s, int16_t x, int16_t y) {
 	tft.println(text);
 }
 
-int pow(int base, int exp) {
-	int result = 1;
+int32_t pow(int base, int exp) {
+	int32_t result = 1;
 	for (;;) {
 		if (exp & 1)
 			result *= base;
