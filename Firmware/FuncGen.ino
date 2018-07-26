@@ -22,9 +22,9 @@ void drawMenuBar();
 void drawMainScreen();
 void drawMainScreenWaveform(bool drawPartial = false);
 void drawMainScreenFrequency(bool drawPartial = false);
-Menu::Menu_e getNextMenuItem(DIR::rotaryEncoderDir direction);
-void changeFrequencyDigit(DIR::rotaryEncoderDir dir, uint8_t digitPos);
-void changeFrequency(DIR::rotaryEncoderDir dir);
+Menu::Menu_e getNextMenuItem(Direction::dir direction);
+void changeFrequencyDigit(Direction::dir dir, uint8_t digitPos);
+void changeFrequency(Direction::dir dir);
 void callButtonEvent(ClickEncoder::Button button);
 
 
@@ -56,27 +56,27 @@ void setup() {
 void onRotaryEncoderTurnEvent() {
 
 	rotaryEncoderPos += encoder.getValue();
-	DIR::rotaryEncoderDir dir = DIR::NONE;
+	Direction::dir dir = Direction::NONE;
 
 	int8_t rotaryEncoderMovement = rotaryEncoderPos - rotaryEncoderLastPos;
 	if (rotaryEncoderMovement != 0) {
-		dir = (rotaryEncoderMovement > 0) ? DIR::CW : DIR::CCW;
+		dir = (rotaryEncoderMovement > 0) ? Direction::CW : Direction::CCW;
 		rotaryEncoderLastPos = rotaryEncoderPos;
 		isAccelerated = (abs(rotaryEncoderMovement) > 1) ? true : false;
  	}
 	else {
-		dir = DIR::NONE;
+		dir = Direction::NONE;
 	}
 
 	//navigate menu if no Menu item currently selected
-	if (dir != DIR::NONE && menuSelected != Menu::NullItem && menuSelected != menuActive) {
+	if (dir != Direction::NONE && menuSelected != Menu::NullItem && menuSelected != menuActive) {
 		if (menuSelected != getNextMenuItem(dir)) {
 			menuSelected = getNextMenuItem(dir);
 			drawMenuBar();
 		}
 	}
 	//rotary encoder actions if a menu item is active
-	else if (dir != DIR::NONE && menuSelected == menuActive) {
+	else if (dir != Direction::NONE && menuSelected == menuActive) {
 		switch (menuActive)
 		{
 		case Menu::NullItem:
@@ -88,11 +88,11 @@ void onRotaryEncoderTurnEvent() {
 			changeFrequencyDigit(dir, digitPos);
 			break;
 		case Menu::Mode:
-			if (dir == DIR::CW && selectedWaveform < 2) {
+			if (dir == Direction::CW && selectedWaveform < 2) {
 				selectedWaveform++;
 				drawMainScreenWaveform(true);
 				sigGen.mode(selectedWaveform);
-			} else if (dir == DIR::CCW && selectedWaveform > 0) {
+			} else if (dir == Direction::CCW && selectedWaveform > 0) {
 				selectedWaveform--;
 				drawMainScreenWaveform(true);
 				sigGen.mode(selectedWaveform);
@@ -113,16 +113,16 @@ void onRotaryEncoderTurnEvent() {
 }
 
 //change digit or unit in frequency set menu
-void changeFrequencyDigit(DIR::rotaryEncoderDir dir, uint8_t digitPos) {
+void changeFrequencyDigit(Direction::dir dir, uint8_t digitPos) {
 	int8_t rnew;
 
 	if (digitPos == numDigits) {
-		if (dir == DIR::CW)
+		if (dir == Direction::CW)
 			newFrequencyExp = (newFrequencyExp == 6) ? 6 : newFrequencyExp + 3;
 		else
 			newFrequencyExp = (newFrequencyExp == 0) ? 0 : newFrequencyExp - 3;
 	} else {
-		if (dir == DIR::CW)
+		if (dir == Direction::CW)
 			newFrequency[digitPos] = (newFrequency[digitPos] == 9) ? 0 : newFrequency[digitPos] + 1;
 		else
 			newFrequency[digitPos] = (newFrequency[digitPos] == 0) ? 9 : newFrequency[digitPos] - 1;
@@ -132,25 +132,25 @@ void changeFrequencyDigit(DIR::rotaryEncoderDir dir, uint8_t digitPos) {
 }
 
 //change frequency in MainScreen
-void changeFrequency(DIR::rotaryEncoderDir dir) {
+void changeFrequency(Direction::dir dir) {
 	uint32_t step;
 
 	if (frequency > 1000000) { //MHz
 		step = (isAccelerated) ? 100000 : 10000;
-		if (dir == DIR::CCW && frequency - step < 1000000)
+		if (dir == Direction::CCW && frequency - step < 1000000)
 			step = abs(frequency - 1000000);
-		if (dir == DIR::CW && frequency + step > maxFrequency)
+		if (dir == Direction::CW && frequency + step > maxFrequency)
 			step = maxFrequency - frequency;
 	} else if (frequency > 1000) { //kHz
 		step = (isAccelerated) ? 1000 : 10;
-		if (dir == DIR::CCW && frequency - step < 1000)
+		if (dir == Direction::CCW && frequency - step < 1000)
 			step = abs(frequency - 1000);
 	} else {
 		step = (isAccelerated) ? 100 : 1;
-		if (dir == DIR::CCW && frequency <= step)
+		if (dir == Direction::CCW && frequency <= step)
 			step = abs(frequency - 1);
 	}
-	frequency += (dir == DIR::CW) ? step : step*-1;
+	frequency += (dir == Direction::CW) ? step : step*-1;
 }
 
 //Interrupt Service Routine 
@@ -160,12 +160,12 @@ void ISRcallback() {
 
 
 
-Menu::Menu_e getNextMenuItem(DIR::rotaryEncoderDir direction) {
+Menu::Menu_e getNextMenuItem(Direction::dir direction) {
 	uint8_t next = (int)menuSelected;
-	if (direction == DIR::CW && next < Menu::lastItem - 1) {
+	if (direction == Direction::CW && next < Menu::lastItem - 1) {
 		next++;
 	}
-	else if (direction == DIR::CCW && next > Menu::NullItem + 1) {
+	else if (direction == Direction::CCW && next > Menu::NullItem + 1) {
 		next--;
 	}
 	return (Menu::Menu_e)next;

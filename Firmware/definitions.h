@@ -14,12 +14,12 @@ int16_t rotaryEncoderLastPos = 0;
 int16_t rotaryEncoderPos = 0;
 bool isAccelerated = false;
 
-class DIR {
+class Direction {
 public:
-	enum rotaryEncoderDir {
+	enum dir {
 		NONE,
-		CW,
-		CCW,
+		CW, //Clockwise
+		CCW, //Counterclockwise
 	};
 };
 
