@@ -13,41 +13,70 @@
 
 
 
-AD9833 sigGen(AD9833_FsyncPin, 24000000); // Initialise our AD9833 with FSYNC pin = 10 and a master clock frequency of 24MHz
+AD9833 sigGen(AD9833_FsyncPin, AD9833_ClkFreq); // Initialise our AD9833 with FSYNC pin = 10 and a master clock frequency of 24MHz
 ClickEncoder encoder(rotaryEncoderPinA, rotaryEncoderPinB, rotaryEncoderPinBtn, 4);
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, -1);
 
 //for some reason, compiler sometimes needs forward declaration ¯\_(ツ)_/¯ 
 void drawMenuBar();
+void drawMainScreen();
 void drawMainScreenWaveform(bool drawPartial = false);
 void drawMainScreenFrequency(bool drawPartial = false);
-Menu::Menu_e getNextMenuItem(rotaryEncoderDir direction);
+Menu::Menu_e getNextMenuItem(DIR::rotaryEncoderDir direction);
+void changeFrequencyDigit(DIR::rotaryEncoderDir dir, uint8_t digitPos);
+void changeFrequency(DIR::rotaryEncoderDir dir);
+void callButtonEvent(ClickEncoder::Button button);
 
+
+void setup() {
+	initTFT();
+	displayBootUpMsg(); //display Bootscreen for 2s
+	drawMenuBar();
+	drawMainScreen(); //renders Mainscreen Boxes
+
+
+					  // Initialise the AD9833 with 1KHz sine output, no phase shift for both
+					  // registers and remain on the FREQ0 register
+	sigGen.reset(1);
+	sigGen.setFreq(frequency);
+	sigGen.setPhase(phase);
+	sigGen.setFPRegister(1);
+	sigGen.setFreq(frequency);
+	sigGen.setPhase(phase);
+	sigGen.setFPRegister(0);
+	sigGen.mode(selectedWaveform);
+	sigGen.reset(0);
+
+	Timer1.initialize(1000);
+	Timer1.attachInterrupt(ISRcallback);
+
+	encoder.setAccelerationEnabled(true);
+}
 
 void onRotaryEncoderTurnEvent() {
 
 	rotaryEncoderPos += encoder.getValue();
-	rotaryEncoderDir dir = DIR_NONE;
+	DIR::rotaryEncoderDir dir = DIR::NONE;
 
 	int8_t rotaryEncoderMovement = rotaryEncoderPos - rotaryEncoderLastPos;
 	if (rotaryEncoderMovement != 0) {
-		dir = (rotaryEncoderMovement > 0) ? DIR_CW : DIR_CCW;
+		dir = (rotaryEncoderMovement > 0) ? DIR::CW : DIR::CCW;
 		rotaryEncoderLastPos = rotaryEncoderPos;
 		isAccelerated = (abs(rotaryEncoderMovement) > 1) ? true : false;
  	}
 	else {
-		dir = DIR_NONE;
+		dir = DIR::NONE;
 	}
 
 	//navigate menu if no Menu item currently selected
-	if (dir != DIR_NONE && menuSelected != Menu::NullItem && menuSelected != menuActive) {
+	if (dir != DIR::NONE && menuSelected != Menu::NullItem && menuSelected != menuActive) {
 		if (menuSelected != getNextMenuItem(dir)) {
 			menuSelected = getNextMenuItem(dir);
 			drawMenuBar();
 		}
 	}
 	//rotary encoder actions if a menu item is active
-	else if (dir != DIR_NONE && menuSelected == menuActive) {
+	else if (dir != DIR::NONE && menuSelected == menuActive) {
 		switch (menuActive)
 		{
 		case Menu::NullItem:
@@ -59,40 +88,41 @@ void onRotaryEncoderTurnEvent() {
 			changeFrequencyDigit(dir, digitPos);
 			break;
 		case Menu::Mode:
-			if (dir == DIR_CW && selectedWaveform < 2) {
+			if (dir == DIR::CW && selectedWaveform < 2) {
 				selectedWaveform++;
 				drawMainScreenWaveform(true);
 				sigGen.mode(selectedWaveform);
-			} else if (dir == DIR_CCW && selectedWaveform > 0) {
+			} else if (dir == DIR::CCW && selectedWaveform > 0) {
 				selectedWaveform--;
 				drawMainScreenWaveform(true);
 				sigGen.mode(selectedWaveform);
 			}
 			break;
-		case Menu::Power:
-			break;
-		case Menu::Phase:
-			break;
-		case Menu::Settings:
-			break;
-		case Menu::lastItem:
-			break;
-		default:
-			break;
+		//case Menu::Power:
+		//	break;
+		//case Menu::Phase:
+		//	break;
+		//case Menu::Settings:
+		//	break;
+		//case Menu::lastItem:
+		//	break;
+		//default:
+		//	break;
 		}
 	}
 }
 
-void changeFrequencyDigit(rotaryEncoderDir dir, uint8_t digitPos) {
+//change digit or unit in frequency set menu
+void changeFrequencyDigit(DIR::rotaryEncoderDir dir, uint8_t digitPos) {
 	int8_t rnew;
 
 	if (digitPos == numDigits) {
-		if (dir == DIR_CW)
+		if (dir == DIR::CW)
 			newFrequencyExp = (newFrequencyExp == 6) ? 6 : newFrequencyExp + 3;
 		else
 			newFrequencyExp = (newFrequencyExp == 0) ? 0 : newFrequencyExp - 3;
 	} else {
-		if (dir == DIR_CW)
+		if (dir == DIR::CW)
 			newFrequency[digitPos] = (newFrequency[digitPos] == 9) ? 0 : newFrequency[digitPos] + 1;
 		else
 			newFrequency[digitPos] = (newFrequency[digitPos] == 0) ? 9 : newFrequency[digitPos] - 1;
@@ -101,54 +131,26 @@ void changeFrequencyDigit(rotaryEncoderDir dir, uint8_t digitPos) {
 	drawMainScreenFreqSet();
 }
 
-void changeFrequency(rotaryEncoderDir dir) {
+//change frequency in MainScreen
+void changeFrequency(DIR::rotaryEncoderDir dir) {
 	uint32_t step;
 
 	if (frequency > 1000000) { //MHz
 		step = (isAccelerated) ? 100000 : 10000;
-		if (dir == DIR_CCW && frequency - step < 1000000)
+		if (dir == DIR::CCW && frequency - step < 1000000)
 			step = abs(frequency - 1000000);
-		if (dir == DIR_CW && frequency + step > maxFrequency)
+		if (dir == DIR::CW && frequency + step > maxFrequency)
 			step = maxFrequency - frequency;
 	} else if (frequency > 1000) { //kHz
 		step = (isAccelerated) ? 1000 : 10;
-		if (dir == DIR_CCW && frequency - step < 1000)
+		if (dir == DIR::CCW && frequency - step < 1000)
 			step = abs(frequency - 1000);
 	} else {
 		step = (isAccelerated) ? 100 : 1;
-		if (dir == DIR_CCW && frequency <= step)
+		if (dir == DIR::CCW && frequency <= step)
 			step = abs(frequency - 1);
 	}
-	frequency += (dir == DIR_CW) ? step : step*-1;
-}
-
-void callButtonEvent(ClickEncoder::Button button);
-void drawMainScreen();
-void drawMenuBar();
-
-void setup() {
-	initTFT();
-	displayBootUpMsg(); //display Bootscreen for 2s
-	drawMenuBar();
-	drawMainScreen(); //renders Mainscreen Boxes
-
-
-  // Initialise the AD9833 with 1KHz sine output, no phase shift for both
-  // registers and remain on the FREQ0 register
-  sigGen.reset(1);
-  sigGen.setFreq(frequency0);
-  sigGen.setPhase(phase);
-  sigGen.setFPRegister(1);
-  sigGen.setFreq(frequency1);
-  sigGen.setPhase(phase);
-  sigGen.setFPRegister(0);
-  sigGen.mode(selectedWaveform);
-  sigGen.reset(0);
-
-  Timer1.initialize(1000);
-  Timer1.attachInterrupt(ISRcallback);
-
-  encoder.setAccelerationEnabled(true);  
+	frequency += (dir == DIR::CW) ? step : step*-1;
 }
 
 //Interrupt Service Routine 
@@ -156,135 +158,14 @@ void ISRcallback() {
 	encoder.service();
 }
 
-void loop() {
-  // Check to see if the button has been pressed
-  ClickEncoder::Button button = encoder.getButton();
-  callButtonEvent(button);
-
-  
-  onRotaryEncoderTurnEvent();
 
 
-
-//  switch (menuState) {
-//    // Default state
-//    case 0: {
-//        
-//          //button = 1;
-//          //lcd.setCursor(0, 0);
-//          //lcd.blink();
-//          menuState = 1;
-//          cursorPos = 0;
-//   
-//      } break;
-//    // Settings mode
-//    case 1: {
-//        if (button == 0) {
-//          //button = 1;
-//          // If the setting in Power just toggle between on and off
-//          if (cursorPos == 1) {
-//            currentPowerState = abs(1 - currentPowerState);
-//            updateDisplay = true;
-//            menuState = 0;
-//            if (currentPowerState == 1)
-//              sigGen.sleep(3); // Both DAC and clock turned OFF
-//            else
-//              sigGen.sleep(0); // DAC and clock are turned ON
-//          }
-//          // If usePhase has not been set
-//#ifndef usePhase
-//          else if (cursorPos == 2) {
-//            updateDisplay = true;
-//            menuState = 0; // return to "main menu"
-//            if (freqRegister == 0) {
-//              freqRegister = 1;
-//              sigGen.setFPRegister(1);
-//              frequency = frequency1;
-//            } else {
-//              freqRegister = 0;
-//              sigGen.setFPRegister(0);
-//              frequency = frequency0;
-//            }
-//          }
-//#endif
-//          // Otherwise just set a new state
-//          else
-//            menuState = cursorPos + 2;
-//        }
-//        // Move the cursor position in case it changed
-//        if (lastCursorPos != cursorPos) {
-//          unsigned char realPosR = 0;
-//          unsigned char realPosC;
-//          if (settingsPos[cursorPos] < 16)
-//            realPosC = settingsPos[cursorPos];
-//          else {
-//            realPosC = settingsPos[cursorPos] - 16;
-//            realPosR = 1;
-//          }
-//          //lcd.setCursor(realPosC, realPosR);
-//          lastCursorPos = cursorPos;
-//        }
-//      } break;
-//    // Frequency setting
-//    case 2: {
-//        // Each button press will either enable to change the value of another digit
-//        // or if all digits have been changed, to apply the setting
-//        if (button == 0) {
-//          //button = 1;
-//          if (digitPos < 7)
-//            digitPos++;
-//          else {
-//            digitPos = 0;
-//            menuState = 0;
-//            sigGen.setFreq(frequency);
-//          }
-//        } else if (button == 2) {
-//          //button = 1;
-//          digitPos = 0;
-//          menuState = 0;
-//        }
-//        // Set the blinking cursor on the digit you can currently modify
-//        //lcd.setCursor(9 - digitPos, 0);
-//      } break;
-//
-//    // Phase setting
-//    case 4: {
-//        if (button == 0) {
-//          //button = 1;
-//          if (digitPos < 3)
-//            digitPos++;
-//          else {
-//            digitPos = 0;
-//            menuState = 0;
-//            sigGen.setPhase(phase);
-//          }
-//        }
-//        //lcd.setCursor(5 - digitPos, 1);
-//      } break;
-//    // Change the mode (sine/triangle/clock)
-//    case 5: {
-//        if (button == 0) {
-//          //button = 1;
-//          menuState = 0;
-//          sigGen.mode(selectedWaveform);
-//        }
-//        //lcd.setCursor(13 ,1);
-//      } break;
-//    // Just in case we messed something up
-//    default: {
-//        menuState = 0;
-//      }
-//  }
-
-//  encChange();
-}
-
-Menu::Menu_e getNextMenuItem(rotaryEncoderDir direction) {
+Menu::Menu_e getNextMenuItem(DIR::rotaryEncoderDir direction) {
 	uint8_t next = (int)menuSelected;
-	if (direction == DIR_CW && next < Menu::lastItem - 1) {
+	if (direction == DIR::CW && next < Menu::lastItem - 1) {
 		next++;
 	}
-	else if (direction == DIR_CCW && next > Menu::NullItem + 1) {
+	else if (direction == DIR::CCW && next > Menu::NullItem + 1) {
 		next--;
 	}
 	return (Menu::Menu_e)next;
@@ -302,7 +183,6 @@ void callButtonEvent(ClickEncoder::Button button) {
 	case ClickEncoder::DoubleClicked:
 		onDblClick();
 		break;
-
 	case ClickEncoder::Held:
 		onButtonHold();
 		break;
@@ -918,4 +798,124 @@ int32_t pow(int base, int exp) {
 	}
 
 	return result;
+}
+
+
+void loop() {
+	// Check to see if the button has been pressed  
+	callButtonEvent(encoder.getButton());
+	//checks if rotary encoder has been turned and                                                                                                                                                                   
+	onRotaryEncoderTurnEvent();
+
+
+	//  switch (menuState) {
+	//    // Default state
+	//    case 0: {
+	//        
+	//          //button = 1;
+	//          //lcd.setCursor(0, 0);
+	//          //lcd.blink();
+	//          menuState = 1;
+	//          cursorPos = 0;
+	//   
+	//      } break;
+	//    // Settings mode
+	//    case 1: {
+	//        if (button == 0) {
+	//          //button = 1;
+	//          // If the setting in Power just toggle between on and off
+	//          if (cursorPos == 1) {
+	//            currentPowerState = abs(1 - currentPowerState);
+	//            updateDisplay = true;
+	//            menuState = 0;
+	//            if (currentPowerState == 1)
+	//              sigGen.sleep(3); // Both DAC and clock turned OFF
+	//            else
+	//              sigGen.sleep(0); // DAC and clock are turned ON
+	//          }
+	//          // If usePhase has not been set
+	//#ifndef usePhase
+	//          else if (cursorPos == 2) {
+	//            updateDisplay = true;
+	//            menuState = 0; // return to "main menu"
+	//            if (freqRegister == 0) {
+	//              freqRegister = 1;
+	//              sigGen.setFPRegister(1);
+	//              frequency = frequency1;
+	//            } else {
+	//              freqRegister = 0;
+	//              sigGen.setFPRegister(0);
+	//              frequency = frequency0;
+	//            }
+	//          }
+	//#endif
+	//          // Otherwise just set a new state
+	//          else
+	//            menuState = cursorPos + 2;
+	//        }
+	//        // Move the cursor position in case it changed
+	//        if (lastCursorPos != cursorPos) {
+	//          unsigned char realPosR = 0;
+	//          unsigned char realPosC;
+	//          if (settingsPos[cursorPos] < 16)
+	//            realPosC = settingsPos[cursorPos];
+	//          else {
+	//            realPosC = settingsPos[cursorPos] - 16;
+	//            realPosR = 1;
+	//          }
+	//          //lcd.setCursor(realPosC, realPosR);
+	//          lastCursorPos = cursorPos;
+	//        }
+	//      } break;
+	//    // Frequency setting
+	//    case 2: {
+	//        // Each button press will either enable to change the value of another digit
+	//        // or if all digits have been changed, to apply the setting
+	//        if (button == 0) {
+	//          //button = 1;
+	//          if (digitPos < 7)
+	//            digitPos++;
+	//          else {
+	//            digitPos = 0;
+	//            menuState = 0;
+	//            sigGen.setFreq(frequency);
+	//          }
+	//        } else if (button == 2) {
+	//          //button = 1;
+	//          digitPos = 0;
+	//          menuState = 0;
+	//        }
+	//        // Set the blinking cursor on the digit you can currently modify
+	//        //lcd.setCursor(9 - digitPos, 0);
+	//      } break;
+	//
+	//    // Phase setting
+	//    case 4: {
+	//        if (button == 0) {
+	//          //button = 1;
+	//          if (digitPos < 3)
+	//            digitPos++;
+	//          else {
+	//            digitPos = 0;
+	//            menuState = 0;
+	//            sigGen.setPhase(phase);
+	//          }
+	//        }
+	//        //lcd.setCursor(5 - digitPos, 1);
+	//      } break;
+	//    // Change the mode (sine/triangle/clock)
+	//    case 5: {
+	//        if (button == 0) {
+	//          //button = 1;
+	//          menuState = 0;
+	//          sigGen.mode(selectedWaveform);
+	//        }
+	//        //lcd.setCursor(13 ,1);
+	//      } break;
+	//    // Just in case we messed something up
+	//    default: {
+	//        menuState = 0;
+	//      }
+	//  }
+
 }

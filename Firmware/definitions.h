@@ -14,10 +14,13 @@ int16_t rotaryEncoderLastPos = 0;
 int16_t rotaryEncoderPos = 0;
 bool isAccelerated = false;
 
-enum rotaryEncoderDir {
-	DIR_NONE,
-	DIR_CW,
-	DIR_CCW,
+class DIR {
+public:
+	enum rotaryEncoderDir {
+		NONE,
+		CW,
+		CCW,
+	};
 };
 
 class Menu {
@@ -52,40 +55,25 @@ const uint8_t TFT_CS = 9;
 const uint8_t TFT_DC = 8;
 
 // Variables used to input data and walk through menu
-
-unsigned char settingsPos[] = { 0, 14, 20, 29 };
-unsigned char button;
-unsigned char lastCursorPos = 0;
-unsigned char cursorPos = 0;
 Menu::Menu_e menuSelected = Menu::NullItem; //highligted menu item selected with rotary encoder
 Menu::Menu_e menuActive = Menu::NullItem; //currently active menu item
 bool buttonIsHeld = false;  //check if button is still held or is a new hold event after a release event
-uint8_t digitPos = 0;
+uint8_t digitPos = 0;  //highlighted digit in frequency set menu, 0-4 for digits, 5 for frequency unit
 uint8_t numDigits;
-const unsigned long maxFrequency = 12000000;
-const unsigned int maxPhase = 4095; // Only used if you enable PHASE setting instead of FREQ register
-uint32_t newFrequency[5];
-uint8_t newFrequencyExp = 0;
-volatile bool updateDisplay = true;
+const uint32_t maxFrequency = AD9833_ClkFreq / 2; //12000000 half the frequency of the Clock
+const uint16_t maxPhase = 4095; // Only used if you enable PHASE setting instead of FREQ register
+uint32_t newFrequency[5]; //stores digits of actual frequency for digit by digit modification in frequency set menu
+uint8_t newFrequencyExp = 0; // 
 
-int freqRegister = 0; // Default FREQ register is 0
-					  // LCD constants
-//const PROGMEM String powerState[] = { " ON", "OFF" };
+
+uint8_t freqRegister = 0; // Default FREQ register is 0
+
 const PROGMEM String waveformLabel[] = { "SINE", "TRINGLE", "SQUARE" };
 // Variables used to store phase, frequency, mode and power
-uint8_t selectedWaveform = 0;
-unsigned long frequency0 = 1000;
-unsigned long frequency1 = 1000;
-uint32_t frequency = frequency0;
-unsigned long currFrequency; // Current frequency used, either 0 or 1
-uint32_t FreqIncrementStep =  1;
+uint8_t selectedWaveform = 0; //0 = Sine, 1 = Triangle, 2 = Square
+uint32_t frequency = 1000;
 unsigned long phase = 0; // Only used if you enable PHASE setting instead of FREQ register
 bool currentPowerState = false;
-// Greek PHI symbol for phase shift
-// Only used if you enable PHASE setting instead of FREQ register
-uint8_t phi[8] = { 0b01110, 0b00100, 0b01110, 0b10101,
-0b10101, 0b01110, 0b00100, 0b01110
-};
 
 
 
