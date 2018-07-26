@@ -4,18 +4,6 @@ DIY Function generator with AD9833 DDS, Atmega328PB Microcontroller and a 1.8" T
 
 This work is based on this [howto](https://www.allaboutcircuits.com/projects/how-to-DIY-waveform-generator-analog-devices-ad9833-ATmega328p/) from allaboutcircuits.com
 
-## Todo List
-
-- [x] publish board and schematics on GitHub
-- [x] create bill of materials
-- [x] order parts
-- [x] order milled circuit board 
-- [x] build prototype on a milled circuit board
-- [x] design and publish a laser cutted case
-- [x] modify microcontroller firmware for changed parts (atmega328pb and TFT Display)
-- [x] publish source for microcontroller firmware 
-- [ ] arrange labels for silkscreen on printed circuit board
-
 ## Bill of Materials
 ### AD9833 & µController Board
 
