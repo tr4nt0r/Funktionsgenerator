@@ -46,5 +46,12 @@ Function generator with AD9833 DDS, Atmega328PB Microcontroller and a 1.8" TFT D
 #### Pin Connectors
 You will need several pin headers and connectors , 2x2 Pin, 2x3 Pin, 1x 5 Pin. You could use any connector with a pitch of 0,1"/2,54mm either regular pinheaders or [Molex KK 254 Connectors](https://de.rs-online.com/web/c/steckverbinder/leiterplattensteckverbinder/leiterplatten-header/?redirect-relevancy-data=636F3D3126696E3D4931384E53656172636847656E65726963266C753D6465266D6D3D6D61746368616C6C7061727469616C26706D3D5E2E2A2426706F3D31333326736E3D592673723D52656469726563742673743D43415443485F414C4C5F44454641554C542673633D592677633D4E4F4E45267573743D73746966746C6569737465267374613D73746966746C656973746526&r=f&applied-dimensions=4294965668,4293240458,4294519411,4294519436,4294516238,4294878123).
 
+### Images
+
+![Bild](/Images/IMG_20180803_085027157.jpg)
+
+![Bild](/Images/IMG_20180803_085035546.jpg)
+
+![Bild](/Images/IMG_20180803_085046675.jpg)
 
 This work is based on this [howto](https://www.allaboutcircuits.com/projects/how-to-DIY-waveform-generator-analog-devices-ad9833-ATmega328p/) from allaboutcircuits.com
